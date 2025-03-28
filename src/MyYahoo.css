@@ -1,0 +1,64 @@
+body {
+  background-color: white;
+}              
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+.data-table th, .data-table td {
+  border: 1px solid #ddd;
+  padding: 4px;
+}
+.data-table th {
+  background-color: #f2f2f2;
+  text-align: left;
+}
+.data-header {
+  cursor: pointer;
+  background-color: #f2f2f2;
+  padding: 5px;
+  margin-bottom: 5px;
+  border: 1px solid #ddd;
+}
+.hidden-link {
+  cursor: pointer;
+  text-decoration:none;           
+}
+.row-positive {
+  color: green;
+}
+.row-negative {
+  color: red;
+}
+.row-neutral {
+  color: black;
+}
+.small-text {
+  font-size: small;
+}
+.myMiniButton {
+  box-shadow: 0px 1px 0px 0px #f0f7fa;
+  background:linear-gradient(to bottom, #525286 5%, #019ad2 100%);
+  background-color:#525286;
+  border-radius:3px;
+  border:1px solid #057fd0;
+  display:inline-block;
+  cursor:pointer;
+  color:#ffffff;
+  font-family:Arial;
+  font-size:10px;
+  font-weight:bold;
+  padding:3px 6px;
+  text-decoration:none;
+  text-shadow:0px -1px 0px #5b6178;
+}
+.myMiniButton:hover {
+  background:linear-gradient(to bottom, #019ad2 5%, #525286 100%);
+  background-color:#019ad2;
+}
+.myMiniButton:active {
+  position:relative;
+  top:1px;
+}  
