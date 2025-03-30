@@ -21,3 +21,19 @@ To start the server portion of this app run:
  ### `node server.js`
 
  To change the data just modify the myyahoo.json filefound in the root diretory
+
+
+ ### `Sports Team IDs:`
+
+ You can find the IDs for the teams you want to add from ESPN's API:
+ 
+ MLB - https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams
+ 
+ NHL - https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/teams
+ 
+ NBA - https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams
+ 
+ NFL - https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams
+ 
+
+ I believe there are a few other sports available.  
