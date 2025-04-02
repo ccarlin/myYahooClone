@@ -14,6 +14,7 @@ const App = () => {
   });
 
   const [visibleTables, setVisibleTables] = useState({}); // State to track table visibility
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light'); // Load theme from localStorage
 
   // Initialize visibility state for all tables
   const initializeVisibility = (data, prefix) => {
@@ -31,6 +32,17 @@ const App = () => {
       [key]: !prev[key],
     }));
   };
+
+  // Toggle theme and save to localStorage
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+  };
+
+  useEffect(() => {
+    document.body.className = theme; // Apply theme to the body
+  }, [theme]);
 
   let sportsTimer = null; // Variable to store the timer ID
   let stockTimer = null; // Variable to store the timer ID
@@ -132,36 +144,41 @@ const App = () => {
   }, []);
 
   return (
-    <table style={{ width: '100%' }}>
-      <tr>
-        <td valign="top" width="30%" rowSpan="2">
-          <h2>
-            Stock Information - <span className="small-text">{timestamps.stock}</span>
-            <button className="myMiniButton" onClick={() => fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock')}>Update Stocks</button>
-          </h2>
-          {buildStockTables(stockInfo, toggleTable, visibleTables)}
-        </td>
-        <td valign="top" width="35%" style={{ paddingLeft: '10px' }} rowSpan="2">
-          <h2>
-            News Feed - <span className="small-text">{timestamps.news}</span>
-            <button className="myMiniButton" onClick={() => fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news')}>Update News</button>
-          </h2>
-          {buildNewsTables(newsFeeds, toggleTable, visibleTables)}
-        </td>
-        <td valign="top" width="35%" style={{ paddingLeft: '10px' }}>
-          <h2>
-            Sports Feed - <span className="small-text">{timestamps.sports}</span>
-            <button className="myMiniButton" onClick={() => fetchData('/myYahoo/sportsUpdate', setSportsFeeds, 'sports', 'sports')}>Update Sports</button>
-          </h2>
-          {buildSportsTables(sportsFeeds, toggleTable, visibleTables)}
-          <h2>
-            Weather Information - <span className="small-text">{timestamps.weather}</span>
-            <button className="myMiniButton" onClick={() => fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather')}>Update Weather</button>
-          </h2>
-          {buildWeatherTables(weatherInfo, toggleTable, visibleTables)}
-        </td>
-      </tr>
-    </table>
+    <div>
+      <button className="theme-toggle" onClick={toggleTheme}>
+        Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
+      </button>
+      <table style={{ width: '100%' }}>
+        <tr>
+          <td valign="top" width="30%" rowSpan="2">
+            <h2>
+              Stock Information - <span className="small-text">{timestamps.stock}</span>
+              <button className="myMiniButton" onClick={() => fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock')}>Update Stocks</button>
+            </h2>
+            {buildStockTables(stockInfo, toggleTable, visibleTables)}
+          </td>
+          <td valign="top" width="35%" style={{ paddingLeft: '10px' }} rowSpan="2">
+            <h2>
+              News Feed - <span className="small-text">{timestamps.news}</span>
+              <button className="myMiniButton" onClick={() => fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news')}>Update News</button>
+            </h2>
+            {buildNewsTables(newsFeeds, toggleTable, visibleTables)}
+          </td>
+          <td valign="top" width="35%" style={{ paddingLeft: '10px' }}>
+            <h2>
+              Sports Feed - <span className="small-text">{timestamps.sports}</span>
+              <button className="myMiniButton" onClick={() => fetchData('/myYahoo/sportsUpdate', setSportsFeeds, 'sports', 'sports')}>Update Sports</button>
+            </h2>
+            {buildSportsTables(sportsFeeds, toggleTable, visibleTables)}
+            <h2>
+              Weather Information - <span className="small-text">{timestamps.weather}</span>
+              <button className="myMiniButton" onClick={() => fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather')}>Update Weather</button>
+            </h2>
+            {buildWeatherTables(weatherInfo, toggleTable, visibleTables)}
+          </td>
+        </tr>
+      </table>
+    </div>
   );
 };  
 

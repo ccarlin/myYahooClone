@@ -61,4 +61,74 @@ body {
 .myMiniButton:active {
   position:relative;
   top:1px;
-}  
+}
+
+/* Default light mode styles */
+body.light {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+body.light .data-header {
+  background-color: #f0f0f0;
+  color: #000000;
+}
+
+body.light .data-table {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* Dark mode styles */
+body.dark {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+body.dark .data-header {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
+
+body.dark .data-table {
+  background-color: #1e1e1e;
+  color: #ffffff; /* White text for better readability */
+}
+
+body.dark .data-table th {
+  background-color: #333333; /* Darker background for table headers */
+  color: #ffffff; /* White text for better contrast */
+  border-color: #444444; /* Adjust border color for dark mode */
+}
+
+body.dark .row-neutral {
+  color: white;
+}
+
+/* Dark mode styles for links */
+body.dark .data-table a {
+  color: #4ea8de; /* Light blue for better readability */
+  text-decoration: none; /* Optional: Remove underline for cleaner look */
+}
+
+body.dark .data-table a:hover {
+  color: #82cfff; /* Brighter blue on hover for better visibility */
+  text-decoration: underline; /* Optional: Add underline on hover */
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  padding: 10px 20px;
+  background-color: #0078d7;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+theme-toggle:hover {
+  background-color: #005a9e;
+}
