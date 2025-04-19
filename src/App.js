@@ -15,6 +15,7 @@ const App = () => {
 
   const [visibleTables, setVisibleTables] = useState({}); // State to track table visibility
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light'); // Load theme from localStorage
+  const [collapsedCategories, setCollapsedCategories] = useState({}); // Move state here
 
   // Initialize visibility state for all tables
   const initializeVisibility = (data, prefix) => {
@@ -38,6 +39,13 @@ const App = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
+  };
+
+  const toggleCategory = (categoryIndex) => {
+    setCollapsedCategories((prev) => ({
+      ...prev,
+      [categoryIndex]: !prev[categoryIndex],
+    }));
   };
 
   useEffect(() => {
@@ -143,36 +151,62 @@ const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    // Initialize visibility for news feeds
+    const initializeNewsVisibility = () => {
+      const visibility = {};
+      newsFeeds.forEach((category, categoryIndex) => {
+        category.feeds.forEach((feed, feedIndex) => {
+          visibility[`news-${categoryIndex}-${feedIndex}`] = true; // Set all news tables to visible
+        });
+      });
+      return visibility;
+    };
+
+    setVisibleTables((prev) => ({
+      ...prev,
+      ...initializeNewsVisibility(),
+    }));
+  }, [newsFeeds]);
+
   return (
-    <div>
-      <button className="theme-toggle" onClick={toggleTheme}>
-        Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
-      </button>
+    <div>      
       <table style={{ width: '100%' }}>
         <tr>
           <td valign="top" width="30%" rowSpan="2">
             <h2>
               Stock Information - <span className="small-text">{timestamps.stock}</span>
-              <button className="myMiniButton" onClick={() => fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock')}>Update Stocks</button>
+              <img src="refresh.png" alt="Refresh" class="refresh-icon"
+                onClick={() => fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock')}
+              />
             </h2>
             {buildStockTables(stockInfo, toggleTable, visibleTables)}
           </td>
           <td valign="top" width="35%" style={{ paddingLeft: '10px' }} rowSpan="2">
             <h2>
               News Feed - <span className="small-text">{timestamps.news}</span>
-              <button className="myMiniButton" onClick={() => fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news')}>Update News</button>
+              <img src="refresh.png" alt="Refresh" class="refresh-icon" 
+                onClick={() => fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news')}
+              />
             </h2>
-            {buildNewsTables(newsFeeds, toggleTable, visibleTables)}
+            {buildNewsTables(newsFeeds, toggleTable, visibleTables, collapsedCategories, toggleCategory)}
           </td>
           <td valign="top" width="35%" style={{ paddingLeft: '10px' }}>
             <h2>
               Sports Feed - <span className="small-text">{timestamps.sports}</span>
-              <button className="myMiniButton" onClick={() => fetchData('/myYahoo/sportsUpdate', setSportsFeeds, 'sports', 'sports')}>Update Sports</button>
-            </h2>
+              <img src="refresh.png" alt="Refresh" class="refresh-icon"
+              onClick={() => fetchData('/myYahoo/sportsUpdate', setSportsFeeds, 'sports', 'sports')}
+              />
+                <button class="theme-toggle" onClick={toggleTheme}>
+                  Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
+                </button>
+            </h2>        
             {buildSportsTables(sportsFeeds, toggleTable, visibleTables)}
             <h2>
               Weather Information - <span className="small-text">{timestamps.weather}</span>
-              <button className="myMiniButton" onClick={() => fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather')}>Update Weather</button>
+              <img src="refresh.png" alt="Refresh" class="refresh-icon"
+                onClick={() => fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather')}
+              />
             </h2>
             {buildWeatherTables(weatherInfo, toggleTable, visibleTables)}
           </td>
@@ -221,27 +255,49 @@ const buildStockTables = (stockInfo, toggleTable, visibleTables) => {
   ));
 };
 
-const buildNewsTables = (newsFeeds, toggleTable, visibleTables) => {
-  return newsFeeds.map((feed, index) => (
-    <div key={index}>
-      <div className="data-header" onClick={() => toggleTable(`news-${index}`)}>
-        {feed.name}
-      </div>
-      {visibleTables[`news-${index}`] && (
-        <table className="data-table">
-          <tbody>
-            {feed.items.map((item, idx) => (
-              <tr key={idx}>
-                <td>
-                  <a href={item.link} target="_blank" rel="noopener noreferrer">
-                    {item.title}
-                  </a>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+const buildNewsTables = (newsFeeds, toggleTable, visibleTables, collapsedCategories, toggleCategory) => {
+  return newsFeeds.map((category, categoryIndex) => (
+    <div key={categoryIndex}>
+      {/* Category Header */}
+      <h3
+        className="data-header"
+        onClick={() => toggleCategory(categoryIndex)}
+        style={{ cursor: 'pointer' }}
+      >
+        {category.category}
+      </h3>
+
+      {/* Category Content */}
+      {!collapsedCategories[categoryIndex] &&
+        category.feeds.map((feed, feedIndex) => (
+          <div key={feedIndex}>
+            {/* Feed Table */}
+            <table className="data-table">
+              <thead>
+                <tr
+                  className="data-header"
+                  onClick={() => toggleTable(`news-${categoryIndex}-${feedIndex}`)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <th colSpan="1">{feed.name}</th>
+                </tr>
+              </thead>
+              {visibleTables[`news-${categoryIndex}-${feedIndex}`] && (
+                <tbody>
+                  {feed.feedData.items.map((item, itemIndex) => (
+                    <tr key={item.guid || itemIndex}>
+                      <td>
+                        <a href={item.link} target="_blank" rel="noopener noreferrer">
+                          {item.title}
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              )}
+            </table>
+          </div>
+        ))}
     </div>
   ));
 };

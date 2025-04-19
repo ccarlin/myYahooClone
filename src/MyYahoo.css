@@ -118,10 +118,8 @@ body.dark .data-table a:hover {
 
 /* Theme toggle button */
 .theme-toggle {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  padding: 10px 20px;
+  padding: 4px 4px;
+  margin-left: 20px;
   background-color: #0078d7;
   color: #ffffff;
   border: none;
@@ -132,3 +130,12 @@ body.dark .data-table a:hover {
 theme-toggle:hover {
   background-color: #005a9e;
 }
+
+.refresh-icon {
+  width: 20px;
+  height: 20px;
+  vertical-align: bottom;
+  margin-right: 4px;
+  margin-left: 4px;
+  cursor: pointer;
+} 

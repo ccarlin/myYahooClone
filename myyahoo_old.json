@@ -1,0 +1,189 @@
+{
+    "Portfolios": [
+        {
+            "name": "Watchlist",
+            "stockList": ["^DJI", "^IXIC", "^GSPC", "AAPL", "CRWD", "GE", "INTC", "LHX", "META", "NFLX", "TSLA", "ZM"]
+        },
+        {
+            "name": "Random Stocks",
+            "stockList": ["PGR", "COP", "GOOG", "HCA", "HON", "LOW", "NFLX", "NOW", "PEP", "TJX", "V", "WMT", "XOM", "ZTS"]
+        },       
+        {
+            "name": "Security Industry",
+            "stockList": ["ANET", "CHKP", "CYBR", "FFIV", "FSLY", "FTNT", "HACK", "JNPR", "NET", "PANW", "RDWR", "ZS"]
+        }
+    ],
+    "WeatherAreas": [        
+        {
+            "name": "St. Louis, MO",
+            "latitude": 38.6270,
+            "longitude": -90.1994            
+        },
+        {
+            "name": "Minneapolis, MN",
+            "latitude": 44.9778,
+            "longitude": -93.2650
+        },       
+        {
+            "name": "Las Vegas, NV",
+            "latitude": 36.1699,
+            "longitude": -115.1398
+        },
+        {
+            "name": "Palm Beach, FL",
+            "latitude": 26.7153,
+            "longitude": -80.0534
+        }
+    ],
+    "NewsFeeds": [                     
+        {
+            "category": "news",
+            "name": "Yahoo News",
+            "url": "https://news.yahoo.com/rss/"
+        }, 
+        {
+            "category": "news",
+            "name": "Cnet",
+            "url": "https://www.cnet.com/rss/news/"
+        },       
+        {
+            "category": "finance",
+            "name": "Yahoo Finance",
+            "url": "https://finance.yahoo.com/news/rssindex"
+        },
+        {
+            "category": "finance",
+            "name": "Seeking Alpha",
+            "url": "https://seekingalpha.com/market_currents.xml"
+        },
+        {
+            "category": "tech",
+            "name": "Tech Crunch",
+            "url": "https://techcrunch.com/feed/"
+        },
+        {
+            "category":"tech",
+            "name": "Wired",
+            "url": "https://www.wired.com/feed/rss"
+        },
+        {
+            "category":"tech",
+            "name": "Endgadget",
+            "url":"https://www.engadget.com/rss.xml"
+        },
+        {
+            "category":"tech",
+            "name": "Mashable",
+            "url": "https://mashable.com/feeds/rss/all"
+        },
+        { 
+            "category": "tech",
+            "name": "Gizmodo", 
+            "url": "https://gizmodo.com/feed"
+        },
+        {
+            "name": "Yahoo Sports",
+            "url": "https://sports.yahoo.com/general/news/rss/"
+        },
+        {
+            "name": "Yahoo NHL",
+            "url": "https://sports.yahoo.com/nhl/rss/"
+        },
+        {
+            "name": "BBC",
+            "url": "http://feeds.bbci.co.uk/news/rss.xml"
+        }
+    ],
+    "WeatherCodes" : {
+        "0" : "Clear sky",
+        "1" : "Mainly clear",
+        "2" : "Partly cloudy",
+        "3" : "Overcast",
+        "45" : "Fog",
+        "48" : "Fog",
+        "51" : "Light Drizzle",
+        "53" : "Moderate Drizzle",
+        "55" : "Heavy Drizzle",
+        "56" : "Light Freezing drizzle",
+        "57" : "Heavy Freezing drizzle",
+        "61" : "Light Rain",
+        "63" : "Moderate Rain",
+        "65" : "Heavy Rain",
+        "66" : "Light Freezing rain",
+        "67" : "Heavy Freezing rain",
+        "71" : "Light Snow",
+        "73" : "Moderate Snow",
+        "75" : "Heavy Snow",
+        "77" : "Snow grains",
+        "80" : "Light Rain showers",
+        "81" : "Moderate Rain showers",
+        "82" : "Heavy Rain showers",
+        "85" : "Slight Snow showers",
+        "86" : "Heavy Snow showers",
+        "95" : "Moderate Thunderstorm",
+        "96" : "Sligth Hail",
+        "99" : "Heavy Hail"
+    },
+    "Sports" : [       
+        {
+            "name": "NHL",
+            "news": "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/news",            
+            "scoreboard": "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard",
+            "teams": [
+                {
+                    "name": "NY Islanders",
+                    "url": "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/teams/12",
+                    "id": "12"
+                },
+                {
+                    "name": "Chicago Blackhawks",
+                    "url": "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/teams/4",
+                    "id": "4"
+                }
+            ]
+        },        
+        {
+            "name": "NBA",
+            "news": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/news",
+            "scoreboard": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard",
+            "teams": [
+                {
+                    "name": "NY Knicks",
+                    "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/18",                    
+                    "id": "18"
+                }
+            ]
+        },   
+        {
+            "name": "MLB",
+            "news": "https://www.espn.com/mlb/",
+            "scoreboard": "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard",
+            "teams": [
+                {
+                    "name": "NY Yankees",
+                    "url": "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/10",
+                    "id": "10"
+                }
+            ]
+        },
+        {
+            "name": "NFL",
+            "scoreboard": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard",
+            "news": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/news",            
+            "teams": [
+                {
+                    "name": "NY Jets",
+                    "url": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/20",
+                    "id": "20"
+                }
+            ]
+        }   
+    ],
+    "BrokenFeeds" : [
+        {
+            "category": "finance",
+            "name": "Dow Jones",
+            "url": "https://feeds.content.dowjones.io/public/rss/mw_topstories"
+        }
+    ]
+}

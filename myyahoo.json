@@ -1,97 +1,203 @@
 {
     "Portfolios": [
         {
-            "name": "Watchlist",
-            "stockList": ["^DJI", "^IXIC", "^GSPC", "AAPL", "CRWD", "GE", "INTC", "LHX", "META", "NFLX", "TSLA", "ZM"]
+            "name": "Quotes",
+            "stockList": ["AKAM", "AMGN", "AMZN", "CMCSA", "CSCO", "EQR", "GAP", "GSK", "HD", "KO", "MDRX", "MRK", "MSFT", "PG", "TEMWX", "TGT"],
+            "collapsed": false
         },
         {
-            "name": "Random Stocks",
-            "stockList": ["PGR", "COP", "GOOG", "HCA", "HON", "LOW", "NFLX", "NOW", "PEP", "TJX", "V", "WMT", "XOM", "ZTS"]
-        },       
+            "name": "Watchlist",
+            "stockList": ["^DJI", "^IXIC", "^GSPC", "AAPL", "CRWD", "GE", "INTC", "LHX", "META", "NFLX", "TSLA", "ZM"],
+            "collapsed": false
+        },
+        {
+            "name": "ML Suggestions",
+            "stockList": ["PGR", "COP", "GOOG", "HCA", "HON", "LOW", "NFLX", "NOW", "PEP", "TJX", "V", "WMT", "XOM", "ZTS"],
+            "collapsed": false
+        },
+        {
+            "name": "ML Watchlist",
+            "stockList": ["BA", "BMRN", "BMY", "C", "DOV", "JPM", "MRVL", "QCOM", "RTX", "TEAM", "URI"],
+            "collapsed": false
+        },
+        {
+            "name": "2021 Watchlist",
+            "stockList": ["ALL", "AMAT", "CIVI", "COIN", "CVS", "NWL", "PH"],
+            "collapsed": false
+        },
         {
             "name": "Security Industry",
-            "stockList": ["ANET", "CHKP", "CYBR", "FFIV", "FSLY", "FTNT", "HACK", "JNPR", "NET", "PANW", "RDWR", "ZS"]
+            "stockList": ["ANET", "CHKP", "CYBR", "FFIV", "FSLY", "FTNT", "HACK", "JNPR", "NET", "PANW", "RDWR", "S", "ZS"],
+            "collapsed": true
         }
     ],
-    "WeatherAreas": [        
+    "WeatherAreas": [
+        {
+            "name": "Deerfield, IL",
+            "latitude": 42.1714,
+            "longitude": -87.8448,
+            "collapsed": false
+        },
         {
             "name": "St. Louis, MO",
             "latitude": 38.6270,
-            "longitude": -90.1994            
+            "longitude": -90.1994,
+            "collapsed": true
         },
         {
             "name": "Minneapolis, MN",
             "latitude": 44.9778,
-            "longitude": -93.2650
-        },       
+            "longitude": -93.2650,
+            "collapsed": true
+        },
+        {
+            "name": "Bethpage, NY",
+            "latitude": 40.7441,
+            "longitude": -73.4862,
+            "collapsed": true
+        },      
         {
             "name": "Las Vegas, NV",
             "latitude": 36.1699,
-            "longitude": -115.1398
+            "longitude": -115.1398,
+            "collapsed": true
         },
         {
             "name": "Palm Beach, FL",
             "latitude": 26.7153,
-            "longitude": -80.0534
+            "longitude": -80.0534,
+            "collapsed": true
         }
     ],
-    "NewsFeeds": [                     
+    "NewsFeeds": [    
         {
-            "category": "news",
-            "name": "Yahoo News",
-            "url": "https://news.yahoo.com/rss/"
-        }, 
-        {
-            "category": "news",
-            "name": "Cnet",
-            "url": "https://www.cnet.com/rss/news/"
-        },       
-        {
-            "category": "finance",
-            "name": "Yahoo Finance",
-            "url": "https://finance.yahoo.com/news/rssindex"
+            "category": "News",
+            "feeds": [
+                {                   
+                    "name": "Yahoo News",
+                    "url": "https://news.yahoo.com/rss/"
+                }, 
+                {                 
+                    "name": "Cnet",
+                    "url": "https://www.cnet.com/rss/news/"
+                },  
+                {
+                    "name": "BBC",
+                    "url": "http://feeds.bbci.co.uk/news/rss.xml"
+                },
+                {
+                    "name": "Vcheck",
+                    "url": "https://www.vcheckglobal.com/feed/",
+                    "collapsed": true
+                }    
+            ],
+            "collapsed": false
         },
         {
-            "category": "finance",
-            "name": "Seeking Alpha",
-            "url": "https://seekingalpha.com/market_currents.xml"
+            "category": "Finance",
+            "feeds": [
+                {
+                    "name": "Yahoo Finance",
+                    "url": "https://finance.yahoo.com/news/rssindex"
+                },
+                {
+                    "name": "Dow Jones",
+                    "url": "https://feeds.content.dowjones.io/public/rss/mw_topstories"
+                },
+                {
+                    "name": "Seeking Alpha",
+                    "url": "https://seekingalpha.com/market_currents.xml"
+                }
+            ],
+            "collapsed": false
         },
         {
-            "category": "tech",
-            "name": "Tech Crunch",
-            "url": "https://techcrunch.com/feed/"
+            "category": "Technology",
+            "feeds": [
+                {
+                    "name": "Tech Crunch",
+                    "url": "https://techcrunch.com/feed/"
+                },
+                {
+                    "name": "Wired",
+                    "url": "https://www.wired.com/feed/rss"
+                },
+                {
+                    "name": "Endgadget",
+                    "url":"https://www.engadget.com/rss.xml"
+                },
+                {
+                    "name": "Mashable",
+                    "url": "https://mashable.com/feeds/rss/all"
+                },
+                { 
+                    "name": "Gizmodo", 
+                    "url": "https://gizmodo.com/feed"
+                },
+                {
+                    "name": "Stack Overflow",
+                    "url": "https://stackoverflow.blog/feed/"
+                }
+            ],
+            "collapsed": false
         },
         {
-            "category":"tech",
-            "name": "Wired",
-            "url": "https://www.wired.com/feed/rss"
+            "category": "Sports",
+            "feeds" : [
+                {
+                    "name": "Yahoo Sports",
+                    "url": "https://sports.yahoo.com/general/news/rss/"
+                },
+                {
+                    "name": "Yahoo NHL",
+                    "url": "https://sports.yahoo.com/nhl/rss/"
+                }               
+            ],
+            "collapsed": true
         },
         {
-            "category":"tech",
-            "name": "Endgadget",
-            "url":"https://www.engadget.com/rss.xml"
-        },
+            "category": "Entertainment",
+            "feeds": [
+                {
+                    "name": "The Onion",
+                    "url": "https://theonion.com/feed/"
+                },
+                {
+                    "name": "Bleeding Cool",
+                    "url": "https://bleedingcool.com/movies/feed/"
+                },
+                {   
+                    "name": "Slash Film",
+                    "url": "https://feeds2.feedburner.com/slashfilm"
+                },                                                 
+                {
+                    "name": "Variety",
+                    "url": "https://variety.com/feed/"
+                },
+                {
+                    "name": "MovieFone Movie News",
+                    "url": "https://www.moviefone.com/feeds/movie-news.rss"
+                },
+                {
+                    "name": "MovieFone TV News",
+                    "url": "https://www.moviefone.com/feeds/tv-news.rss"
+                }
+            ],
+            "collapsed": true
+        },      
         {
-            "category":"tech",
-            "name": "Mashable",
-            "url": "https://mashable.com/feeds/rss/all"
-        },
-        { 
-            "category": "tech",
-            "name": "Gizmodo", 
-            "url": "https://gizmodo.com/feed"
-        },
-        {
-            "name": "Yahoo Sports",
-            "url": "https://sports.yahoo.com/general/news/rss/"
-        },
-        {
-            "name": "Yahoo NHL",
-            "url": "https://sports.yahoo.com/nhl/rss/"
-        },
-        {
-            "name": "BBC",
-            "url": "http://feeds.bbci.co.uk/news/rss.xml"
+            "category": "Science",
+            "feeds": [
+                {
+                   "name": "Gizmodo",
+                    "url": "https://gizmodo.com/tag/science/feed"
+                },
+                {
+                    "name": "Nasa",
+                    "url": "https://www.nasa.gov/news-release/feed/"
+                }
+            ],
+            "collapsed": false
         }
     ],
     "WeatherCodes" : {
@@ -140,7 +246,8 @@
                     "url": "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/teams/4",
                     "id": "4"
                 }
-            ]
+            ],
+            "collapsed": false
         },        
         {
             "name": "NBA",
@@ -152,7 +259,8 @@
                     "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/18",                    
                     "id": "18"
                 }
-            ]
+            ],
+            "collapsed": false
         },   
         {
             "name": "MLB",
@@ -164,7 +272,8 @@
                     "url": "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/10",
                     "id": "10"
                 }
-            ]
+            ],
+            "collapsed": false
         },
         {
             "name": "NFL",
@@ -176,14 +285,15 @@
                     "url": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/20",
                     "id": "20"
                 }
-            ]
+            ],
+            "collapsed": false
         }   
     ],
-    "BrokenFeeds" : [
+    "BrokenFeeds" : [      
         {
-            "category": "finance",
-            "name": "Dow Jones",
-            "url": "https://feeds.content.dowjones.io/public/rss/mw_topstories"
+            "category": "entertaniment",
+            "name": "TV Fanatic",
+            "url": "https://www.tvfanatic.com/feed/"
         }
     ]
 }

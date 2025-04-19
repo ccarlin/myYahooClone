@@ -145,23 +145,59 @@ async function getStockPrices(symbols)
 
 async function getNewsFeedInfo(feedList)
 {
-    let newsFeeds = [];
-    let feedData = {};
-    for(let i = 0; i < feedList.length; i++) {
-        let feed = feedList[i];
-        try
-        {
-            feedData = await rssParser.parseURL(feed.url);
-            feedData.name = feed.name;
-            feedData.items = feedData.items.slice(0, 5);
-            newsFeeds.push(feedData);
-        }
-        catch (err)
-        {
-            console.log(`Error pulling news feed: ${feed.url}, Error: ${err}`);
+    // Detect if the feedList is in the old format
+    const isOldFormat = feedList.some(feed => feed.category && !feed.feeds);
+
+    if (isOldFormat) {
+        // Transform old format to new format
+        feedList = transformOldToNewFormat(feedList);
+    }
+
+    for (let i = 0; i < feedList.length; i++) {
+        let category = feedList[i];
+        for (let j = 0; j < category.feeds.length; j++) {
+            let feed = category.feeds[j];
+            try {
+                let feedData = await rssParser.parseURL(feed.url);
+                feedData.name = feed.name;
+                feedData.items = feedData.items.slice(0, 5); // Limit to 5 items
+                category.feeds[j].feedData = feedData;
+            } catch (err) {
+                console.log(`Error pulling news feed: ${feed.url}, Error: ${err}`);
+            }
         }
     }
-    return newsFeeds;
+
+    fs.writeFileSync("newFeeds.json", JSON.stringify(feedList, null, 2));
+    return feedList;
+}
+
+// Helper function to transform old format to new format
+function transformOldToNewFormat(feedList) {
+    const transformed = [];
+
+    // Group feeds by category
+    const categoryMap = {};
+    feedList.forEach(feed => {
+        const category = feed.category || "Uncategorized";
+        if (!categoryMap[category]) {
+            categoryMap[category] = {
+                category: category,
+                feeds: []
+            };
+        }
+        categoryMap[category].feeds.push({
+            name: feed.name,
+            url: feed.url
+        });
+    });
+
+    // Convert categoryMap to an array
+    for (const category in categoryMap) {
+        transformed.push(categoryMap[category]);
+    }
+
+    return transformed;
 }
 
 async function getWeatherInfo(areaList)
