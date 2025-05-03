@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.8.4",
     "body-parser": "^2.2.0",
+    "bootstrap": "^5.3.5",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "openmeteo": "^1.2.0",

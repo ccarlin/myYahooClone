@@ -66,13 +66,6 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-function getConfigData()
-{
-    let jsonFile = fs.readFileSync("./myyahoo.json");
-    let jsonData = JSON.parse(jsonFile);
-
-    return jsonData;
-}
 
 async function GetSportInfo(sportsFeeds)
 {
@@ -420,3 +413,374 @@ async function getSportsFeed(sport, teams, dateFetch)
 
     return sportsFeeds;
 }
+
+// #region Helper Methods
+function getConfigData()
+{
+    let jsonFile = fs.readFileSync("./myyahoo.json");
+    let jsonData = JSON.parse(jsonFile);
+
+    return jsonData;
+}
+
+function saveConfigData(jsonData)
+{
+    fs.writeFileSync("./myYahoo.json", JSON.stringify(jsonData, null, 2)); 
+}
+
+// #endregion
+
+// #region API Endpoints
+app.post('/removeWeatherLocation', async function (req, res) {
+    let jsonData = getConfigData();
+    let locationName = req.body.locationName;
+
+    // Find and remove the weather location
+    const index = jsonData.WeatherAreas.findIndex(area => area.name === locationName);
+    if (index !== -1) {
+        jsonData.WeatherAreas.splice(index, 1); // Remove the location from the array
+        saveConfigData( jsonData); // Save the updated data back to the file     
+        return res.send({ success: true, message: `Weather location "${locationName}" removed successfully.` });
+    } else {
+        return res.send({ success: false, message: `Weather location "${locationName}" not found.` });
+    }
+});
+
+app.post('/removeStock', async function (req, res) {
+   
+    let jsonData = getConfigData();
+    let portfolioName = req.body.portfolioName;
+    let stockSymbol = req.body.stockSymbol;
+
+    // Find the portfolio
+    let portfolio = jsonData.Portfolios.find(p => p.name === portfolioName);
+    if (portfolio) {
+        // Find and remove the stock from the portfolio
+        const index = portfolio.stockList.findIndex(stock => stock === stockSymbol);
+        if (index !== -1) {
+            portfolio.stockList.splice(index, 1); // Remove the stock from the array
+            saveConfigData( jsonData); // Save the updated data back to the file     
+            return res.send({ success: true, message: `Stock "${stockSymbol}" removed from portfolio "${portfolioName}" successfully.` });
+        } else {
+            return res.send({ success: false, message: `Stock "${stockSymbol}" not found in portfolio "${portfolioName}".` });
+        }
+    } else {
+        return res.send({ success: false, message: `Portfolio "${portfolioName}" not found.` });
+    }
+});
+
+app.post('/removeRSSFeed', async function (req, res) {
+    let jsonData = getConfigData();
+    
+    let categoryName = req.body.category;
+    let feedName = req.body.feedName;
+
+    // Find the category
+    let category = jsonData.NewsFeeds.find(c => c.category === categoryName);
+    if (category) {
+        // Find and remove the RSS feed from the category
+        const index = category.feeds.findIndex(feed => feed.name === feedName);
+        if (index !== -1) {
+            category.feeds.splice(index, 1); // Remove the feed from the array
+            saveConfigData( jsonData); // Save the updated data back to the file     
+            return res.send({ success: true, message: `RSS feed "${feedName}" removed from category "${categoryName}" successfully.` });
+        } else {
+            return res.send({ success: false, message: `RSS feed "${feedName}" not found in category "${categoryName}".` });
+        }
+    } else {
+        return res.send({ success: false, message: `Category "${categoryName}" not found.` });
+    }
+});
+
+app.post('/addRSSFeed', async function (req, res) {
+    let jsonData = getConfigData();
+    
+    let categoryName = req.body.category;
+    let feedUrl = req.body.rssUrl;
+    let feedName = req.body.name;
+
+    // Validate input
+    if (!categoryName || !feedUrl || !feedName) {
+        return res.send({ success: false, message: 'Category, feed name, and feed URL are required.' });
+    }
+
+    // Check if the category already exists
+    let category = jsonData.NewsFeeds.find(c => c.category === categoryName);
+    if (category) {
+        // Check if the feed already exists in the category
+        let existingFeed = category.feeds.find(feed => feed.url === feedUrl);
+        if (existingFeed) {
+            return res.send({ success: false, message: `RSS feed "${feedName}" already exists in category "${categoryName}".` });
+        }
+
+        // Add the new feed to the existing category
+        category.feeds.push({ name: feedName, url: feedUrl });
+    } else {
+        // Create a new category and add the feed
+        jsonData.NewsFeeds.push({
+            category: categoryName,
+            feeds: [{ name: feedName, url: feedUrl }]
+        });
+    }
+
+    // Save the updated data back to the file
+    saveConfigData( jsonData); // Save the updated data back to the file     
+
+    return res.send({ success: true, message: `RSS feed "${feedName}" added to category "${categoryName}" successfully.` });
+});
+
+app.post('/addStock', async function (req, res) {
+    let jsonData = getConfigData();
+    
+    let portfolioName = req.body.portfolioName;
+    let stockSymbols = req.body.stockSymbol; // Comma-delimited list of stock symbols
+
+    // Validate input
+    if (!portfolioName || !stockSymbols) {
+        return res.send({ success: false, message: 'Portfolio name and stock symbols are required.' });
+    }
+
+    // Split the stock symbols into an array
+    const stockList = stockSymbols.split(',').map(symbol => symbol.trim()).filter(symbol => symbol);
+
+    if (stockList.length === 0) {
+        return res.send({ success: false, message: 'No valid stock symbols provided.' });
+    }
+
+    // Check if the portfolio already exists
+    let portfolio = jsonData.Portfolios.find(p => p.name === portfolioName);
+    if (portfolio) {
+        // Add each stock to the portfolio if it doesn't already exist
+        stockList.forEach(stockSymbol => {
+            if (!portfolio.stockList.includes(stockSymbol)) {
+                portfolio.stockList.push(stockSymbol);
+            }
+        });
+    } else {
+        // Create a new portfolio and add the stocks
+        jsonData.Portfolios.push({
+            name: portfolioName,
+            stockList: stockList
+        });
+    }
+
+    // Save the updated data back to the file
+    saveConfigData( jsonData);
+
+    return res.send({ success: true, message: `Stocks added to portfolio "${portfolioName}" successfully.` });
+});
+
+app.post('/addWeatherLocation', async function (req, res) {
+    let jsonData = getConfigData();
+    
+    let locationName = req.body.locationName;
+    let latitude = req.body.latitude;   
+    let longitude = req.body.longitude;
+
+    // Check if the location already exists
+    let existingLocation = jsonData.WeatherAreas.find(area => area.name === locationName);
+    if (existingLocation) {
+        return res.send({ success: false, message: `Weather location "${locationName}" already exists.` });
+    }
+
+    // Add the new weather location
+    jsonData.WeatherAreas.push({
+        name: locationName,
+        latitude: latitude,
+        longitude: longitude,
+        collapsed: false // Set collapsed to false by default
+    });
+
+    // Save the updated data back to the file
+    saveConfigData( jsonData); // Save the updated data back to the file     
+
+    return res.send({ success: true, message: `Weather location "${locationName}" added successfully.` });
+});
+
+app.post('/searchLocation', async function (req, res) {
+    const locationName = req.body.locationName;
+
+    if (!locationName) {
+        return res.send({ success: false, message: 'Location name is required.' });
+    }
+
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationName)}&count=10&language=en&format=json&countryCode=US`;
+
+    try {
+        const response = await axios.get(url);
+        if (response.data && response.data.results && response.data.results.length > 0) {
+            return res.send({ success: true, locations: response.data.results });
+        } else {
+            return res.send({ success: false, message: `No locations found for "${locationName}".` });
+        }
+    } catch (error) {
+        console.error(`Error fetching locations for "${locationName}":`, error.message);
+        return res.send({ success: false, message: 'An error occurred while searching for locations.' });
+    }
+});
+
+app.post('/getTeamList', async function (req, res) {
+    const sportName = req.body.league;
+    if (!sportName) {
+        return res.send({ success: false, message: 'A valid sport is required.' });
+    }
+    
+    const configPath = req.app.locals.configPath;
+    const fileName = req.body.fileName || "startPageInfo";
+    const jsonData = getConfigData(configPath, fileName);
+    const existingSportsConfig = jsonData.Sports || [];
+    let teams = [];   
+    let sportPath = "";
+    switch (sportName) {
+        case "NHL":
+            sportPath = "hockey/nhl";
+            break;
+        case "NFL":
+            sportPath = "football/nfl";
+            break;
+        case "NBA":
+            sportPath = "basketball/nba";
+            break;
+        case "MLB":
+            sportPath = "baseball/mlb";
+            break;
+        case "MLS":
+            sportPath = "soccer/mls";
+            break;
+        default:
+            return res.send({ success: false, message: `Sport "${sportName}" not supported.` });
+    }
+
+    try {
+        // Fetch the list of teams from the external API
+        const teamList = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/${sportPath}/teams`);
+        if (teamList.data && teamList.data.sports && teamList.data.sports.length > 0) {
+            teams = teamList.data.sports[0].leagues[0].teams.map(team => {
+                const teamId = team.team.id;
+
+                // Check if the team is already in the existing sports configuration
+                const isSelected = existingSportsConfig.some(sport => 
+                    sport.name === sportName && sport.teams.some(existingTeam => existingTeam.id === teamId)
+                );
+
+                return {
+                    id: teamId,
+                    name: team.team.displayName,
+                    logo: team.team.logos[0].href,
+                    selected: isSelected // Mark as selected if already in the configuration
+                };
+            });
+        }
+
+        if (teams.length === 0) {
+            return res.send({ success: false, message: `No teams found for sport "${sportName}".` });
+        }
+
+        return res.send({ success: true, teams: teams });
+    } catch (error) {
+        console.error(`Error fetching teams for league "${sportName}":`, error.message);
+        return res.send({ success: false, message: 'An error occurred while fetching teams.' });
+    }
+});
+
+app.post('/saveSelectedTeams', async function (req, res) {
+    const { league, selectedTeams } = req.body;
+
+    if (!league || !selectedTeams || !Array.isArray(selectedTeams)) {
+        return res.send({ success: false, message: 'Invalid data provided.' });
+    }
+
+    let jsonData = getConfigData();
+
+    // Update the sports configuration
+    const sportConfig = jsonData.Sports.find(sport => sport.name === league);
+    if (sportConfig) {
+        sportConfig.teams = selectedTeams; // Replace the teams for the league
+    } else {
+        // Add a new league configuration if it doesn't exist
+        jsonData.Sports.push({ name: league, teams: selectedTeams });
+    }
+
+    // Save the updated configuration
+    saveConfigData(jsonData);
+
+    return res.send({ success: true, message: 'Teams saved successfully.' });
+});
+
+app.post('/updateCollapsedState', async function (req, res) {
+    const { section, name, collapsed } = req.body;
+
+    if (!section || !name || typeof collapsed === 'undefined') {
+        return res.send({ success: false, message: 'Invalid data provided.' });
+    }
+
+    let jsonData = getConfigData();
+
+    if (!jsonData) {
+        return res.send({ success: false, message: 'Failed to load configuration data.' });
+    }
+
+    try {
+        let updated = false;
+
+        // Update the collapsed state for the specified section
+        switch (section) {
+            case 'Portfolios':
+                { const portfolio = jsonData.Portfolios.find(p => p.name === name);
+                if (portfolio) {
+                    portfolio.collapsed = collapsed;
+                    updated = true;
+                }
+                break; }
+            case 'WeatherAreas':
+                { const weatherArea = jsonData.WeatherAreas.find(w => w.name === name);
+                if (weatherArea) {
+                    weatherArea.collapsed = collapsed;
+                    updated = true;
+                }
+                break; }
+            case 'NewsCategories':
+                { 
+                    const newsCategory = jsonData.NewsFeeds.find(n => n.category === name);
+                    if (newsCategory) {
+                        newsCategory.collapsed = collapsed;
+                        updated = true;
+                    }
+                    break; 
+                }
+            case 'NewsFeeds':
+                { 
+                    // Split the name into category and feed name
+                    const pieces = name.split(':');
+                    const newsCategory = jsonData.NewsFeeds.find(n => n.category === pieces[0]);
+                    if (newsCategory) {
+                        const feed = newsCategory.feeds.find(f => f.name === pieces[1]);
+                        if (feed) {
+                            feed.collapsed = collapsed;
+                            updated = true;
+                        }                                              
+                }
+                break; }
+            case 'Sports':
+                { const sport = jsonData.Sports.find(s => s.name === name);
+                if (sport) {
+                    sport.collapsed = collapsed;
+                    updated = true;
+                }
+                break; }
+            default:
+                return res.send({ success: false, message: 'Invalid section provided.' });
+        }
+
+        if (updated) {
+            saveConfigData(jsonData);
+            return res.send({ success: true, message: 'Collapsed state updated successfully.' });
+        } else {
+            return res.send({ success: false, message: `Item "${name}" not found in section "${section}".` });
+        }
+    } catch (error) {
+        console.error(`Error updating collapsed state: ${error.message}`);
+        return res.send({ success: false, message: 'An error occurred while updating the collapsed state.' });
+    }
+});
+// #endregion

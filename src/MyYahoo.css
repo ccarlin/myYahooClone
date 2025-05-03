@@ -1,6 +1,16 @@
 body {
   background-color: white;
-}              
+  color: black;
+  transition: background-color 0.3s, color 0.3s;
+}    
+h2 {
+  display: block;
+  font-size: 1.5em;          
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  font-weight: bold;
+  unicode-bidi: isolate;
+}          
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -17,10 +27,13 @@ body {
 }
 .data-header {
   cursor: pointer;
-  background-color: #f2f2f2;
+  background-color: #525286;;
+  font-weight: bold;
+  color: white;
   padding: 5px;
   margin-bottom: 5px;
   border: 1px solid #ddd;
+  font-size: 14px;
 }
 .hidden-link {
   cursor: pointer;
@@ -125,6 +138,7 @@ body.dark .data-table a:hover {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 12px;
 }
 
 theme-toggle:hover {
@@ -139,3 +153,12 @@ theme-toggle:hover {
   margin-left: 4px;
   cursor: pointer;
 } 
+.img-link {
+  cursor: pointer;
+  margin-right: 5px;
+  vertical-align: bottom;            
+}
+.category-container
+{
+    border: 1px solid #ddd;
+}

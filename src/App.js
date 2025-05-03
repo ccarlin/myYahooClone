@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './MyYahoo.css';
 
 const App = () => {  
@@ -16,6 +17,7 @@ const App = () => {
   const [visibleTables, setVisibleTables] = useState({}); // State to track table visibility
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light'); // Load theme from localStorage
   const [collapsedCategories, setCollapsedCategories] = useState({}); // Move state here
+  const [showTrashIcons, setShowTrashIcons] = useState(true); // State to toggle trash icons
 
   // Initialize visibility state for all tables
   const initializeVisibility = (data, prefix) => {
@@ -109,6 +111,7 @@ const App = () => {
     const now = new Date();
     
     // Fetch news data
+    // Ensure fetchData is defined or imported before using it
     fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather');
 
     // Determine the next timeout duration
@@ -176,39 +179,42 @@ const App = () => {
           <td valign="top" width="30%" rowSpan="2">
             <h2>
               Stock Information - <span className="small-text">{timestamps.stock}</span>
-              <img src="refresh.png" alt="Refresh" class="refresh-icon"
+              <img src="refresh.png" alt="Refresh" className="refresh-icon"
                 onClick={() => fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock')}
               />
             </h2>
-            {buildStockTables(stockInfo, toggleTable, visibleTables)}
+            {buildStockTables(stockInfo, toggleTable, visibleTables, fetchData, setStockInfo, showTrashIcons)}
           </td>
           <td valign="top" width="35%" style={{ paddingLeft: '10px' }} rowSpan="2">
             <h2>
               News Feed - <span className="small-text">{timestamps.news}</span>
-              <img src="refresh.png" alt="Refresh" class="refresh-icon" 
+              <img src="refresh.png" alt="Refresh" className="refresh-icon" 
                 onClick={() => fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news')}
               />
             </h2>
-            {buildNewsTables(newsFeeds, toggleTable, visibleTables, collapsedCategories, toggleCategory)}
+            {buildNewsTables(newsFeeds, toggleTable, visibleTables, collapsedCategories, toggleCategory, fetchData, setNewsFeeds, showTrashIcons)}
           </td>
           <td valign="top" width="35%" style={{ paddingLeft: '10px' }}>
             <h2>
-              Sports Feed - <span className="small-text">{timestamps.sports}</span>
-              <img src="refresh.png" alt="Refresh" class="refresh-icon"
+              Sports - <span className="small-text">{timestamps.sports}</span>
+              <img src="refresh.png" alt="Refresh" className="refresh-icon"
               onClick={() => fetchData('/myYahoo/sportsUpdate', setSportsFeeds, 'sports', 'sports')}
               />
-                <button class="theme-toggle" onClick={toggleTheme}>
-                  Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
-                </button>
+              <button className="theme-toggle" onClick={toggleTheme}>
+                Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
+              </button>
+              <button className="theme-toggle" onClick={() => setShowTrashIcons((prev) => !prev)}>
+                {showTrashIcons ? 'Hide Trash Icons' : 'Show Trash Icons'}
+              </button>
             </h2>        
             {buildSportsTables(sportsFeeds, toggleTable, visibleTables)}
             <h2>
               Weather Information - <span className="small-text">{timestamps.weather}</span>
-              <img src="refresh.png" alt="Refresh" class="refresh-icon"
+              <img src="refresh.png" alt="Refresh" className="refresh-icon"
                 onClick={() => fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather')}
               />
             </h2>
-            {buildWeatherTables(weatherInfo, toggleTable, visibleTables)}
+            {buildWeatherTables(weatherInfo, toggleTable, visibleTables, fetchData, setWeatherInfo, showTrashIcons)}
           </td>
         </tr>
       </table>
@@ -217,7 +223,31 @@ const App = () => {
 };  
 
 // Updated helper functions
-const buildStockTables = (stockInfo, toggleTable, visibleTables) => {
+const buildStockTables = (stockInfo, toggleTable, visibleTables, fetchData, setStockInfo, showTrashIcons) => {
+  const removeStock = async (portfolioName, stockSymbol) => {
+    try {
+      const response = await fetch('http://localhost:5000/removeStock', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ portfolioName, stockSymbol }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert(result.message);
+        // Refresh the stock data after deletion
+        fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock');
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      console.error('Error removing stock:', error);
+      alert('An error occurred while removing the stock.');
+    }
+  };
+
   return stockInfo.map((portfolio, index) => (
     <div key={index}>
       <div className="data-header" onClick={() => toggleTable(`stock-${index}`)}>
@@ -232,13 +262,18 @@ const buildStockTables = (stockInfo, toggleTable, visibleTables) => {
               <th>Price</th>
               <th>Change</th>
               <th>Change %</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {portfolio.portfolioData.map((stock, idx) => (
               <tr key={idx} className={getRowClass(stock.change)}>
                 <td>
-                  <a href={`https://finance.yahoo.com/quote/${stock.symbol}/`} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={`https://finance.yahoo.com/quote/${stock.symbol}/`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     {stock.name}
                   </a>
                 </td>
@@ -246,6 +281,20 @@ const buildStockTables = (stockInfo, toggleTable, visibleTables) => {
                 <td>{formatCurrency(stock.price)}</td>
                 <td>{formatCurrency(stock.change || 0)}</td>
                 <td>{stock.changePercent !== undefined ? stock.changePercent.toFixed(2) + '%' : 'N/A'}</td>
+                <td>
+                  <span
+                    className="trash-icon"
+                    onClick={() => removeStock(portfolio.name, stock.symbol)}
+                    style={{
+                      cursor: 'pointer',
+                      color: 'red',
+                      display: showTrashIcons ? 'inline' : 'none', 
+                    }}
+                    title="Remove Stock"
+                  >
+                    🗑️
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -255,7 +304,31 @@ const buildStockTables = (stockInfo, toggleTable, visibleTables) => {
   ));
 };
 
-const buildNewsTables = (newsFeeds, toggleTable, visibleTables, collapsedCategories, toggleCategory) => {
+const buildNewsTables = (newsFeeds, toggleTable, visibleTables, collapsedCategories, toggleCategory, fetchData, setNewsFeeds, showTrashIcons) => {
+  const removeRSSFeed = async (categoryName, feedName) => {
+    try {
+      const response = await fetch('http://localhost:5000/removeRSSFeed', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ category: categoryName, feedName }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert(result.message);
+        // Refresh the news feeds after deletion
+        fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news');
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      console.error('Error removing RSS feed:', error);
+      alert('An error occurred while removing the RSS feed.');
+    }
+  };
+
   return newsFeeds.map((category, categoryIndex) => (
     <div key={categoryIndex}>
       {/* Category Header */}
@@ -274,19 +347,35 @@ const buildNewsTables = (newsFeeds, toggleTable, visibleTables, collapsedCategor
             {/* Feed Table */}
             <table className="data-table">
               <thead>
-                <tr
-                  className="data-header"
-                  onClick={() => toggleTable(`news-${categoryIndex}-${feedIndex}`)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <th colSpan="1">{feed.name}</th>
+                <tr className="data-header">
+                  <th
+                    colSpan="1"
+                    onClick={() => toggleTable(`news-${categoryIndex}-${feedIndex}`)}
+                    style={{ cursor: 'pointer', textAlign: 'left', position: 'relative' }}
+                  >
+                    {feed.name}
+                    <span
+                      className="trash-icon"
+                      onClick={() => removeRSSFeed(category.category, feed.name)}
+                      style={{
+                        cursor: 'pointer',
+                        color: 'red',
+                        display: showTrashIcons ? 'inline' : 'none', 
+                        position: 'absolute',
+                        right: '10px'
+                      }}
+                      title="Remove RSS Feed"
+                    >
+                      🗑️
+                    </span>
+                  </th>
                 </tr>
               </thead>
               {visibleTables[`news-${categoryIndex}-${feedIndex}`] && (
                 <tbody>
                   {feed.feedData.items.map((item, itemIndex) => (
                     <tr key={item.guid || itemIndex}>
-                      <td>
+                      <td colSpan="2">
                         <a href={item.link} target="_blank" rel="noopener noreferrer">
                           {item.title}
                         </a>
@@ -369,11 +458,51 @@ const buildSportsTables = (sportsFeeds, toggleTable, visibleTables) => {
     ));
 };
 
-const buildWeatherTables = (weatherInfo, toggleTable, visibleTables) => {
+const buildWeatherTables = (weatherInfo, toggleTable, visibleTables, fetchData, setWeatherInfo, showTrashIcons) => {
+  const removeWeatherLocation = async (locationName) => {
+    try {
+      const response = await fetch('http://localhost:5000/removeWeatherLocation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ locationName }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert(result.message);
+        // Refresh the weather data after deletion
+        fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather');
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      console.error('Error removing weather location:', error);
+      alert('An error occurred while removing the weather location.');
+    }
+  };
+
   return weatherInfo.map((area, index) => (
     <div key={index}>
-      <div className="data-header" onClick={() => toggleTable(`weather-${index}`)}>
-        {area.name} - {buildDisplay(area.weatherData.current)}
+      <div className="data-header">
+        <span onClick={() => toggleTable(`weather-${index}`)} style={{ cursor: 'pointer' }}>
+          {area.name} - {buildDisplay(area.weatherData.current)}
+        </span>
+        <span
+          className="trash-icon ms-2"
+          onClick={() => removeWeatherLocation(area.name)}
+          style={{
+            cursor: 'pointer',
+            color: 'red',
+            display: showTrashIcons ? 'inline' : 'none', 
+            position: 'absolute',
+            right: '10px'
+          }}
+          title="Remove Weather Location"
+        >
+          🗑️
+        </span>
       </div>
       {visibleTables[`weather-${index}`] && (
         <table className="data-table">
@@ -393,10 +522,12 @@ const buildWeatherTables = (weatherInfo, toggleTable, visibleTables) => {
                 <td>{new Date(time).toLocaleDateString()}</td>
                 <td>{area.weatherData.daily.weatherCode[idx]}</td>
                 <td>
-                  {Math.round(area.weatherData.daily.tempMax[idx])}°/{Math.round(area.weatherData.daily.tempMin[idx])}°
+                  {Math.round(area.weatherData.daily.tempMax[idx])}°/
+                  {Math.round(area.weatherData.daily.tempMin[idx])}°
                 </td>
                 <td>
-                  {degreesToCompass(area.weatherData.daily.windDirection[idx])} {Math.round(area.weatherData.daily.windSpeed[idx])} MPH
+                  {degreesToCompass(area.weatherData.daily.windDirection[idx])}{' '}
+                  {Math.round(area.weatherData.daily.windSpeed[idx])} MPH
                 </td>
                 <td>{area.weatherData.daily.precipitation[idx]}%</td>
                 <td>{formatSeconds(area.weatherData.daily.sun[idx])}</td>
