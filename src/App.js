@@ -2,6 +2,36 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './MyYahoo.css';
 
+const fetchData = async (endpoint, setState, timestampKey, prefix, setVisibleTables, setTimestamps) => {
+  try {
+    const url = `http://localhost:5000${endpoint}`;
+    const response = await fetch(url, { method: 'POST' });
+    const data = await response.json();
+    setState(data);
+
+    // Initialize visibility for the fetched data
+    const initializeVisibility = (data, prefix) => {
+      const visibility = {};
+      data.forEach((_, index) => {
+        visibility[`${prefix}-${index}`] = true; // Set all tables to visible
+      });
+      return visibility;
+    };
+
+    setVisibleTables((prev) => ({
+      ...prev,
+      ...initializeVisibility(data, prefix),
+    }));
+
+    setTimestamps((prev) => ({
+      ...prev,
+      [timestampKey]: new Date().toLocaleString(),
+    }));
+  } catch (error) {
+    console.error(`Error fetching ${endpoint}:`, error);
+  }
+};
+
 const App = () => {  
   const [stockInfo, setStockInfo] = useState([]);
   const [newsFeeds, setNewsFeeds] = useState([]);
@@ -54,96 +84,20 @@ const App = () => {
     document.body.className = theme; // Apply theme to the body
   }, [theme]);
 
-  let sportsTimer = null; // Variable to store the timer ID
-  let stockTimer = null; // Variable to store the timer ID
-  let newsTimer = null; // Variable to store the timer ID
-  let weatherTimer = null; // Variable to store the timer ID
-  
-  const updateSportsData = () => {
-      // Clear any existing timer
-    if (sportsTimer) 
-      clearTimeout(sportsTimer);
-    
-    const now = new Date();
-  
-    // Fetch sports data
-    fetchData('/myYahoo/sportsUpdate', setSportsFeeds, 'sports', 'sports');
-    
-    if (now.getHours() < 19) 
-      sportsTimer = setTimeout(updateSportsData, 3600000);
-    else
-    sportsTimer = setTimeout(updateSportsData, 600000);
+  const updateStockData = () => {
+    fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps);
   };
 
-  const updateStockData = () => {
-    if (stockTimer)
-      clearTimeout(stockTimer);
-    const now = new Date();
-    
-    // Fetch stock data
-    fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock');
-
-    // Determine the next timeout duration
-    if (now.getHours() < 9 || now.getHours() > 15) 
-      stockTimer = setTimeout(updateStockData, 3600000);
-    else
-      stockTimer = setTimeout(updateStockData, 600000);
-  };     
-  
   const updateNewsData = () => {
-    if (newsTimer)
-      clearTimeout(newsTimer);
-    const now = new Date();
-    
-    // Fetch news data
-    fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news');
+    fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps);
+  };
 
-    // Determine the next timeout duration
-    if (now.getHours() < 7 || now.getHours() > 20) 
-      newsTimer = setTimeout(updateNewsData, 3600000);
-    else
-      newsTimer = setTimeout(updateNewsData, 1800000);
-  };   
-  
+  const updateSportsData = () => {
+    fetchData('/myYahoo/sportsUpdate', setSportsFeeds, 'sports', 'sports', setVisibleTables, setTimestamps);
+  };
+
   const updateWeatherData = () => {
-    if (weatherTimer)
-      clearTimeout(weatherTimer);
-    const now = new Date();
-    
-    // Fetch news data
-    // Ensure fetchData is defined or imported before using it
-    fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather');
-
-    // Determine the next timeout duration
-    if (now.getHours() < 7 || now.getHours() > 20) 
-      weatherTimer = setTimeout(updateWeatherData, 3600000);
-    else
-      weatherTimer = setTimeout(updateWeatherData, 900000);
-  };  
-
-  // Fetch data for each section
-  const fetchData = async (endpoint, setState, timestampKey, prefix) => {
-    try {
-      // Append debug=true as a query parameter
-      const url = `http://localhost:5000${endpoint}`;
-
-      const response = await fetch(url, { method: 'POST' });
-      const data = await response.json();
-      setState(data);
-
-      // Initialize visibility for the fetched data
-      setVisibleTables((prev) => ({
-        ...prev,
-        ...initializeVisibility(data, prefix),
-      }));
-
-      setTimestamps((prev) => ({
-        ...prev,
-        [timestampKey]: new Date().toLocaleString(),
-      }));
-    } catch (error) {
-      console.error(`Error fetching ${endpoint}:`, error);
-    }
+    fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps);
   };
 
   useEffect(() => {
@@ -172,33 +126,51 @@ const App = () => {
     }));
   }, [newsFeeds]);
 
+  useEffect(() => {
+    // Initialize Bootstrap modals
+    const bootstrap = require('bootstrap/dist/js/bootstrap.bundle.min.js');
+    const modalElements = document.querySelectorAll('.modal');
+    modalElements.forEach((modal) => {
+      new bootstrap.Modal(modal);
+    });
+  }, []);
+
   return (
-    <div>      
+    <div>
       <table style={{ width: '100%' }}>
         <tr>
           <td valign="top" width="30%" rowSpan="2">
             <h2>
               Stock Information - <span className="small-text">{timestamps.stock}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon"
-                onClick={() => fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock')}
+                onClick={() => fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps)}
+              />
+              <img src="config.png" title="Configure Stocks" data-bs-toggle="modal" data-bs-target="#manage-stocks" 
+                width="20px" className="img-link" alt="Manage Stocks" 
               />
             </h2>
-            {buildStockTables(stockInfo, toggleTable, visibleTables, fetchData, setStockInfo, showTrashIcons)}
+            {buildStockTables(stockInfo, toggleTable, visibleTables, setStockInfo, showTrashIcons, setVisibleTables, setTimestamps)}
           </td>
           <td valign="top" width="35%" style={{ paddingLeft: '10px' }} rowSpan="2">
             <h2>
               News Feed - <span className="small-text">{timestamps.news}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon" 
-                onClick={() => fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news')}
+                onClick={() => fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps)}
+              />
+              <img src="config.png" title="Configure Feeds" data-bs-toggle="modal" data-bs-target="#manage-rss" 
+                width="20px" className="img-link" alt="Manage Feeds" 
               />
             </h2>
-            {buildNewsTables(newsFeeds, toggleTable, visibleTables, collapsedCategories, toggleCategory, fetchData, setNewsFeeds, showTrashIcons)}
+            {buildNewsTables(newsFeeds, toggleTable, visibleTables, collapsedCategories, toggleCategory, fetchData, setNewsFeeds, showTrashIcons, setVisibleTables, setTimestamps)}
           </td>
           <td valign="top" width="35%" style={{ paddingLeft: '10px' }}>
             <h2>
               Sports - <span className="small-text">{timestamps.sports}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon"
-              onClick={() => fetchData('/myYahoo/sportsUpdate', setSportsFeeds, 'sports', 'sports')}
+                onClick={() => fetchData('/myYahoo/sportsUpdate', setSportsFeeds, 'sports', 'sports', setVisibleTables, setTimestamps)}
+              />
+              <img src="config.png" title="Configure Sports" data-bs-toggle="modal" data-bs-target="#manage-sports" 
+                width="20px" className="img-link" alt="Manage Sports" 
               />
               <button className="theme-toggle" onClick={toggleTheme}>
                 Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
@@ -211,34 +183,173 @@ const App = () => {
             <h2>
               Weather Information - <span className="small-text">{timestamps.weather}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon"
-                onClick={() => fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather')}
+                onClick={() => fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps)}
               />
+              <img src="config.png" title="Configure Weather" data-bs-toggle="modal" data-bs-target="#manage-weather" 
+                width="20px" className="img-link" alt="Manage Weather" />
             </h2>
-            {buildWeatherTables(weatherInfo, toggleTable, visibleTables, fetchData, setWeatherInfo, showTrashIcons)}
+            {buildWeatherTables(weatherInfo, toggleTable, visibleTables, setWeatherInfo, showTrashIcons, setVisibleTables, setTimestamps)}
           </td>
         </tr>
       </table>
+
+      {/* Modals */}
+      <div id="manage-stocks" className="modal">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Add Stocks/Portfolios</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              <form id="add-stock-form">
+                <div className="mb-3">
+                  <label htmlFor="portfolio-name" className="form-label">Portfolio Name</label>
+                  <input id="portfolio-name" className="form-control" type="text" placeholder="Enter Portfolio name" />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="stock-symbol" className="form-label">Stock Symbols (comma separated)</label>
+                  <input id="stock-symbol" className="form-control" type="text" placeholder="Enter Stock Symbols (e.g., AAPL,GOOGL)" />
+                </div>
+              </form>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={() => addStock(setVisibleTables, setTimestamps)}>Add Stock</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="manage-sports" className="modal">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Manage Sports Teams</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              <form id="manage-sports-form">
+                <div className="mb-3">
+                  <label htmlFor="league-selector" className="form-label">Select League</label>
+                  <select id="league-selector" className="form-select" onChange={() => fetchTeamsForLeague()}>
+                    <option value="" disabled selected>-- Select a League --</option>
+                    <option value="NBA">NBA</option>
+                    <option value="NHL">NHL</option>
+                    <option value="MLB">MLB</option>
+                    <option value="NFL">NFL</option>
+                  </select>
+                </div>
+                <div id="team-list-container" className="row">
+                  <p>Select a league to view its teams.</p>
+                </div>
+              </form>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={() => saveSelectedTeams()}>Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="manage-rss" className="modal">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Add RSS Feeds</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              <form id="add-rss-feed-form">
+                <div className="mb-3">
+                  <label htmlFor="rss-category" className="form-label">Category</label>
+                  <input id="rss-category" className="form-control" type="text" placeholder="Enter category name" />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="rss-name" className="form-label">RSS Feed Name</label>
+                  <input id="rss-name" className="form-control" type="text" placeholder="Enter RSS feed name" />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="rss-url" className="form-label">RSS Feed URL</label>
+                  <input id="rss-url" className="form-control" type="text" placeholder="Enter RSS feed URL" />
+                </div>
+              </form>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={() => addRSSFeed(setVisibleTables, setTimestamps, setNewsFeeds)}>Add Feed</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="manage-weather" className="modal">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Add Weather Locations</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              <form id="add-weather-location-form">
+                <div className="mb-3 d-flex align-items-center">
+                  <label htmlFor="weather-location" className="form-label me-2">Location</label>
+                  <input
+                    id="weather-location"
+                    className="form-control"
+                    type="text"
+                    placeholder="Enter city or zip"
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-secondary ms-2"
+                    onClick={() => getLocations()}
+                  >
+                    Lookup Location
+                  </button>
+                </div>
+                <div id="location-result">
+                  <p>Search for a location first in order to add one!</p>
+                </div>
+              </form>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => addWeatherLocation(setWeatherInfo, setVisibleTables, setTimestamps)}
+                data-bs-dismiss="modal"
+              >
+                Add Location
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </div>
   );
 };  
 
 // Updated helper functions
-const buildStockTables = (stockInfo, toggleTable, visibleTables, fetchData, setStockInfo, showTrashIcons) => {
-  const removeStock = async (portfolioName, stockSymbol) => {
+const buildStockTables = (stockInfo, toggleTable, visibleTables, setStockInfo, showTrashIcons, setVisibleTables, setTimestamps) => {
+  const removeStock = async (portfolioName, stockSymbol, setVisibleTables, setTimestamps) => {
     try {
-      const response = await fetch('http://localhost:5000/removeStock', {
+      const url = 'http://localhost:5000/myYahoo/removeStock';
+      const response = await fetch(url, {      
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ portfolioName, stockSymbol }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ portfolioName, stockSymbol })
       });
 
       const result = await response.json();
       if (result.success) {
         alert(result.message);
         // Refresh the stock data after deletion
-        fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock');
+        fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps);
       } else {
         alert(result.message);
       }
@@ -284,7 +395,7 @@ const buildStockTables = (stockInfo, toggleTable, visibleTables, fetchData, setS
                 <td>
                   <span
                     className="trash-icon"
-                    onClick={() => removeStock(portfolio.name, stock.symbol)}
+                    onClick={() => removeStock(portfolio.name, stock.symbol, setVisibleTables, setTimestamps)}
                     style={{
                       cursor: 'pointer',
                       color: 'red',
@@ -304,22 +415,21 @@ const buildStockTables = (stockInfo, toggleTable, visibleTables, fetchData, setS
   ));
 };
 
-const buildNewsTables = (newsFeeds, toggleTable, visibleTables, collapsedCategories, toggleCategory, fetchData, setNewsFeeds, showTrashIcons) => {
+const buildNewsTables = (newsFeeds, toggleTable, visibleTables, collapsedCategories, toggleCategory, fetchData, setNewsFeeds, showTrashIcons, setVisibleTables, setTimestamps) => {
   const removeRSSFeed = async (categoryName, feedName) => {
     try {
-      const response = await fetch('http://localhost:5000/removeRSSFeed', {
+      const url = 'http://localhost:5000/myYahoo/removeRSSFeed';
+      const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ category: categoryName, feedName }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: categoryName, feedName })
       });
 
       const result = await response.json();
       if (result.success) {
         alert(result.message);
         // Refresh the news feeds after deletion
-        fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news');
+        fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps);
       } else {
         alert(result.message);
       }
@@ -458,22 +568,21 @@ const buildSportsTables = (sportsFeeds, toggleTable, visibleTables) => {
     ));
 };
 
-const buildWeatherTables = (weatherInfo, toggleTable, visibleTables, fetchData, setWeatherInfo, showTrashIcons) => {
+const buildWeatherTables = (weatherInfo, toggleTable, visibleTables, setWeatherInfo, showTrashIcons, setVisibleTables, setTimestamps) => {
   const removeWeatherLocation = async (locationName) => {
     try {
-      const response = await fetch('http://localhost:5000/removeWeatherLocation', {
+      const url = 'http://localhost:5000/myYahoo/removeWeatherLocation';
+      const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ locationName }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locationName })
       });
 
       const result = await response.json();
       if (result.success) {
         alert(result.message);
         // Refresh the weather data after deletion
-        fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather');
+        fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps);
       } else {
         alert(result.message);
       }
@@ -558,10 +667,21 @@ const degreesToCompass = (degrees) => {
 };
 
 const formatSeconds = (totalSeconds) => {
+  totalSeconds = Math.round(totalSeconds);
+
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return `${hours > 0 ? `${hours}h ` : ''}${minutes}m ${seconds}s`;
+  const remainingSeconds = totalSeconds % 60;
+
+  const formattedHours = String(hours).padStart(2, '0');
+  const formattedMinutes = String(minutes).padStart(2, '0');
+  const formattedSeconds = String(remainingSeconds).padStart(2, '0');
+  
+  if (hours > 0) {
+      return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+  } else {
+      return `${formattedMinutes}:${formattedSeconds}`;
+  }
 };
 
 const buildDisplay = (area) => {
@@ -571,5 +691,292 @@ const buildDisplay = (area) => {
         display += `, ${degreesToCompass(area.windDirection)} ${Math.round(area.windSpeed)}MPH`;
     return display;
 }
+
+const addStock = async (setVisibleTables, setTimestamps) => {
+  const portfolioName = document.getElementById('portfolio-name').value.trim();
+  const stockSymbol = document.getElementById('stock-symbol').value.trim();
+  const setStockInfo = (data) => console.log('setStockInfo is not defined in this scope. Replace this with actual implementation.');
+
+  if (!portfolioName || !stockSymbol) {
+    alert('Please enter both a portfolio name and stock symbols.');
+    return;
+  }
+
+  try {
+    const url = 'http://localhost:5000/myYahoo/addStock';    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json'},
+      body: JSON.stringify({ portfolioName, stockSymbol })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      alert(result.message);
+      // Refresh the stock data after adding
+      fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps);
+    } else {
+      alert(result.message);
+    }
+  } catch (error) {
+    console.error('Error adding stock:', error);
+    alert('An error occurred while adding the stock.');
+  }
+};
+
+const addRSSFeed = async (setVisibleTables, setTimestamps, setNewsFeeds) => {
+  const category = document.getElementById('rss-category').value.trim();
+  const name = document.getElementById('rss-name').value.trim();
+  const rssUrl = document.getElementById('rss-url').value.trim();
+
+  if (!category || !name || !rssUrl) {
+    alert('Please fill out all fields: Category, RSS Feed Name, and RSS Feed URL.');
+    return;
+  }
+
+  try {
+    const url = 'http://localhost:5000/myYahoo/addRSSFeed';
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category, name, rssUrl })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      alert(result.message);
+      // Refresh the news feeds after adding
+      fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps);
+    } else {
+      alert(result.message);
+    }
+  } catch (error) {
+    console.error('Error adding RSS feed:', error);
+    alert('An error occurred while adding the RSS feed.');
+  }
+};
+
+const getLocations = async () => {
+  const location = document.getElementById('weather-location').value.trim();
+  if (!location) {
+    alert('Please fill in the location field.');
+    return;
+  }
+
+  // Clear previous results
+  const locationResultElement = document.getElementById('location-result');
+  locationResultElement.innerHTML = '';
+
+  try {
+    // Call the external REST endpoint
+    const url = 'http://localhost:5000/myYahoo/searchLocation';
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locationName: location })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      // Populate the location-result field with a list of radio buttons
+      const resultList = document.createElement('div');
+      resultList.className = 'list-group';
+
+      result.locations.forEach((location, index) => {
+        const radioItem = document.createElement('div');
+        radioItem.className = 'form-check';
+
+        const input = document.createElement('input');
+        input.className = 'form-check-input';
+        input.type = 'radio';
+        input.name = 'locationRadio';
+        input.id = `location-${index}`;
+        input.value = `${location.name}, ${location.admin1 || ''} | ${location.latitude} | ${location.longitude}`;
+
+        const label = document.createElement('label');
+        label.className = 'form-check-label';
+        label.htmlFor = `location-${index}`;
+        label.textContent = `${location.name}, ${location.admin1 || ''}, ${location.country} (Lat: ${location.latitude}, Lon: ${location.longitude})`;
+
+        radioItem.appendChild(input);
+        radioItem.appendChild(label);
+        resultList.appendChild(radioItem);
+      });
+
+      locationResultElement.appendChild(resultList);
+    } else {
+      locationResultElement.textContent = result.message;
+    }
+  } catch (error) {
+    console.error('Error searching for locations:', error);
+    locationResultElement.textContent = 'An error occurred while searching for locations.';
+  }
+};
+
+const addWeatherLocation = async (setWeatherInfo, setVisibleTables, setTimestamps) => {
+  // Get the selected location from the radio buttons
+  const selectedLocation = document.querySelector('input[name="locationRadio"]:checked');
+  if (!selectedLocation) {
+    alert('Please select a location to add.');
+    return;
+  }
+
+  // Extract location details from the selected radio button's value
+  const [locationName, latitude, longitude] = selectedLocation.value.split('|').map((value) => value.trim());
+
+  if (!locationName || !latitude || !longitude) {
+    alert('Invalid location data. Please try again.');
+    return;
+  }
+
+  try {
+    // Send the location data to the server
+    const url = 'http://localhost:5000/myYahoo/addWeatherLocation';
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locationName, latitude, longitude }),
+    });
+    const result = await response.json();
+
+    if (result.success) {
+      alert(result.message);
+      // Refresh the weather data after adding the location
+      fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps);
+    } else {
+      alert(result.message);
+    }
+  } catch (error) {
+    console.error('Error adding weather location:', error);
+    alert('An error occurred while adding the weather location.');
+  }
+};
+
+const fetchTeamsForLeague = async () => {
+  const leagueSelector = document.getElementById('league-selector');
+  const selectedLeague = leagueSelector.value;
+
+  if (!selectedLeague) {
+    alert('Please select a league.');
+    return;
+  }
+
+  try {
+    // Call the server-side getTeamList method
+    const url = "http://localhost:5000/myYahoo/getTeamList";
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ league: selectedLeague }),
+    });
+    const responseData = await response.json();
+
+    const teamListContainer = document.getElementById('team-list-container');
+    teamListContainer.innerHTML = ''; // Clear previous results
+
+    if (responseData.success) {
+      // Create a row container for two-column layout
+      var row = document.createElement('div');
+      row.className = 'row';
+
+      responseData.teams.forEach((team, index) => {
+        // Create a column for each team
+        const col = document.createElement('div');
+        col.className = 'col-md-6'; // Two columns per row
+
+        const teamItem = document.createElement('div');
+        teamItem.className = 'form-check d-flex align-items-center';
+
+        const input = document.createElement('input');
+        input.className = 'form-check-input me-2';
+        input.type = 'checkbox';
+        input.id = `team-${team.id}`;
+        input.value = `${team.id}|${team.logo}`;;
+        input.checked = team.selected;
+
+        const logo = document.createElement('img');
+        logo.src = team.logo; // Use the team logo URL
+        logo.alt = `${team.name} Logo`;
+        logo.style.width = '30px';
+        logo.style.height = '30px';
+        logo.className = 'me-2';
+
+        const label = document.createElement('label');
+        label.className = 'form-check-label';
+        label.htmlFor = `team-${team.id}`;
+        label.textContent = team.name;
+
+        // Append elements to the team item
+        teamItem.appendChild(input);
+        teamItem.appendChild(logo);
+        teamItem.appendChild(label);
+
+        // Append the team item to the column
+        col.appendChild(teamItem);
+
+        // Append the column to the row
+        row.appendChild(col);
+
+        // Add a new row after every two columns
+        if ((index + 1) % 2 === 0) {
+          teamListContainer.appendChild(row);
+          row = document.createElement('div');
+          row.className = 'row';
+        }
+      });
+
+      // Append the last row if it has remaining columns
+      if (row.children.length > 0) {
+        teamListContainer.appendChild(row);
+      }
+    } else {
+      teamListContainer.textContent = responseData.message;
+    }
+  } catch (error) {
+    console.error('Error fetching teams:', error);
+    const teamListContainer = document.getElementById('team-list-container');
+    teamListContainer.textContent = `An error occurred while fetching teams. ${error}`;
+  }
+};
+
+const saveSelectedTeams = async () => {
+  const leagueSelector = document.getElementById('league-selector');
+  const selectedLeague = leagueSelector.value;
+
+  if (!selectedLeague) {
+    alert('Please select a league.');
+    return;
+  }
+
+  const selectedTeams = [];
+  document.querySelectorAll('#team-list-container .form-check-input:checked').forEach(checkbox => {
+    const [teamId, teamLogo] = checkbox.value.split('|');
+    const teamName = document.querySelector(`label[for="team-${teamId}"]`).textContent.trim();
+    selectedTeams.push({ id: teamId, logo: teamLogo, name: teamName });
+  });
+
+  if (selectedTeams.length === 0) {
+    alert('No teams selected to save.');
+    return;
+  }
+
+  try {
+    const url = 'http://localhost:5000/myYahoo/saveSelectedTeams';
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ league: selectedLeague, selectedTeams }),
+    });
+    const result = await response.json();
+    if (result.success) {
+      alert(result.message);
+    } else {
+      alert(result.message);
+    }
+  } catch (error) {
+    console.error('Error saving selected teams:', error);
+    alert('An error occurred while saving the selected teams.');
+  }
+};
 
 export default App;

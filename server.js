@@ -431,7 +431,7 @@ function saveConfigData(jsonData)
 // #endregion
 
 // #region API Endpoints
-app.post('/removeWeatherLocation', async function (req, res) {
+app.post('/myYahoo/removeWeatherLocation', async function (req, res) {
     let jsonData = getConfigData();
     let locationName = req.body.locationName;
 
@@ -446,7 +446,7 @@ app.post('/removeWeatherLocation', async function (req, res) {
     }
 });
 
-app.post('/removeStock', async function (req, res) {
+app.post('/myYahoo/removeStock', async function (req, res) {
    
     let jsonData = getConfigData();
     let portfolioName = req.body.portfolioName;
@@ -469,7 +469,7 @@ app.post('/removeStock', async function (req, res) {
     }
 });
 
-app.post('/removeRSSFeed', async function (req, res) {
+app.post('/myYahoo/removeRSSFeed', async function (req, res) {
     let jsonData = getConfigData();
     
     let categoryName = req.body.category;
@@ -492,7 +492,7 @@ app.post('/removeRSSFeed', async function (req, res) {
     }
 });
 
-app.post('/addRSSFeed', async function (req, res) {
+app.post('/myYahoo/addRSSFeed', async function (req, res) {
     let jsonData = getConfigData();
     
     let categoryName = req.body.category;
@@ -529,7 +529,7 @@ app.post('/addRSSFeed', async function (req, res) {
     return res.send({ success: true, message: `RSS feed "${feedName}" added to category "${categoryName}" successfully.` });
 });
 
-app.post('/addStock', async function (req, res) {
+app.post('/myYahoo/addStock', async function (req, res) {
     let jsonData = getConfigData();
     
     let portfolioName = req.body.portfolioName;
@@ -570,7 +570,7 @@ app.post('/addStock', async function (req, res) {
     return res.send({ success: true, message: `Stocks added to portfolio "${portfolioName}" successfully.` });
 });
 
-app.post('/addWeatherLocation', async function (req, res) {
+app.post('/myYahoo/addWeatherLocation', async function (req, res) {
     let jsonData = getConfigData();
     
     let locationName = req.body.locationName;
@@ -597,7 +597,7 @@ app.post('/addWeatherLocation', async function (req, res) {
     return res.send({ success: true, message: `Weather location "${locationName}" added successfully.` });
 });
 
-app.post('/searchLocation', async function (req, res) {
+app.post('/myYahoo/searchLocation', async function (req, res) {
     const locationName = req.body.locationName;
 
     if (!locationName) {
@@ -619,7 +619,8 @@ app.post('/searchLocation', async function (req, res) {
     }
 });
 
-app.post('/getTeamList', async function (req, res) {
+app.post('/myYahoo/getTeamList', async function (req, res) {
+    console.log("Get Team List called");
     const sportName = req.body.league;
     if (!sportName) {
         return res.send({ success: false, message: 'A valid sport is required.' });
@@ -683,7 +684,7 @@ app.post('/getTeamList', async function (req, res) {
     }
 });
 
-app.post('/saveSelectedTeams', async function (req, res) {
+app.post('/myYahoo/saveSelectedTeams', async function (req, res) {
     const { league, selectedTeams } = req.body;
 
     if (!league || !selectedTeams || !Array.isArray(selectedTeams)) {
@@ -707,7 +708,7 @@ app.post('/saveSelectedTeams', async function (req, res) {
     return res.send({ success: true, message: 'Teams saved successfully.' });
 });
 
-app.post('/updateCollapsedState', async function (req, res) {
+app.post('/myYahoo/updateCollapsedState', async function (req, res) {
     const { section, name, collapsed } = req.body;
 
     if (!section || !name || typeof collapsed === 'undefined') {
