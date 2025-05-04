@@ -161,7 +161,6 @@ async function getNewsFeedInfo(feedList)
         }
     }
 
-    fs.writeFileSync("newFeeds.json", JSON.stringify(feedList, null, 2));
     return feedList;
 }
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './MyYahoo.css';
 
@@ -215,7 +216,7 @@ const App = () => {
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={() => addStock(setVisibleTables, setTimestamps)}>Add Stock</button>
+              <button type="button" className="btn btn-primary" onClick={() => addStock(setVisibleTables, setTimestamps)}>Add Stock</button>
             </div>
           </div>
         </div>
@@ -247,7 +248,7 @@ const App = () => {
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={() => saveSelectedTeams()}>Save changes</button>
+              <button type="button" className="btn btn-primary" onClick={() => saveSelectedTeams(setVisibleTables, setTimestamps, setSportsFeeds)}>Save changes</button>
             </div>
           </div>
         </div>
@@ -278,7 +279,7 @@ const App = () => {
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={() => addRSSFeed(setVisibleTables, setTimestamps, setNewsFeeds)}>Add Feed</button>
+              <button type="button" className="btn btn-primary" onClick={() => addRSSFeed(setVisibleTables, setTimestamps, setNewsFeeds)}>Add Feed</button>
             </div>
           </div>
         </div>
@@ -320,8 +321,7 @@ const App = () => {
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => addWeatherLocation(setWeatherInfo, setVisibleTables, setTimestamps)}
-                data-bs-dismiss="modal"
+                onClick={() => addWeatherLocation(setWeatherInfo, setVisibleTables, setTimestamps)}               
               >
                 Add Location
               </button>
@@ -651,7 +651,7 @@ const buildWeatherTables = (weatherInfo, toggleTable, visibleTables, setWeatherI
 
 // Helper functions
 const getRowClass = (value) => {
-  
+
   let rowClass = 'row-neutral';
   if (value === "Win")
     rowClass = 'row-positive';
@@ -708,7 +708,7 @@ const addStock = async (setVisibleTables, setTimestamps) => {
   }
 
   try {
-    const url = 'http://localhost:5000/myYahoo/addStock';    
+    const url = 'http://localhost:5000/myYahoo/addStock';
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json'},
@@ -720,6 +720,11 @@ const addStock = async (setVisibleTables, setTimestamps) => {
       alert(result.message);
       // Refresh the stock data after adding
       fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps);
+
+      // Close the modal
+      const modalElement = document.getElementById('manage-stocks');
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      modalInstance.hide();
     } else {
       alert(result.message);
     }
@@ -752,6 +757,11 @@ const addRSSFeed = async (setVisibleTables, setTimestamps, setNewsFeeds) => {
       alert(result.message);
       // Refresh the news feeds after adding
       fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps);
+    
+      // Close the modal
+      const modalElement = document.getElementById('manage-rss');
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      modalInstance.hide();
     } else {
       alert(result.message);
     }
@@ -848,6 +858,11 @@ const addWeatherLocation = async (setWeatherInfo, setVisibleTables, setTimestamp
       alert(result.message);
       // Refresh the weather data after adding the location
       fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps);
+
+      // Close the modal
+      const modalElement = document.getElementById('manage-weather');
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      modalInstance.hide();
     } else {
       alert(result.message);
     }
@@ -944,7 +959,7 @@ const fetchTeamsForLeague = async () => {
   }
 };
 
-const saveSelectedTeams = async () => {
+const saveSelectedTeams = async (setVisibleTables, setTimestamps, setSportsFeeds) => {
   const leagueSelector = document.getElementById('league-selector');
   const selectedLeague = leagueSelector.value;
 
@@ -975,6 +990,12 @@ const saveSelectedTeams = async () => {
     const result = await response.json();
     if (result.success) {
       alert(result.message);
+      fetchData('/myYahoo/sportsUpdate', setSportsFeeds, 'sports', 'sports', setVisibleTables, setTimestamps);
+      
+      // Close the modal
+      const modalElement = document.getElementById('manage-sports');
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      modalInstance.hide();
     } else {
       alert(result.message);
     }
