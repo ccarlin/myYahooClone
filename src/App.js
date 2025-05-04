@@ -534,10 +534,10 @@ const buildSportsTables = (sportsFeeds, toggleTable, visibleTables) => {
                         {item.title}
                       </a>
                     </td>
-                    <td>
+                    <td style={{ fontSize: '28px' }} width="112px">
                       <img src={item.home_logo} alt="Home Logo" width="42" /> {item.home_score}
                     </td>
-                    <td>
+                    <td style={{ fontSize: '28px' }} width="112px">
                       <img src={item.away_logo} alt="Away Logo" width="42" /> {item.away_score}
                     </td>
                     <td>
@@ -651,9 +651,14 @@ const buildWeatherTables = (weatherInfo, toggleTable, visibleTables, setWeatherI
 
 // Helper functions
 const getRowClass = (value) => {
-  if (value > 0) return 'row-positive';
-  if (value < 0) return 'row-negative';
-  return 'row-neutral';
+  
+  let rowClass = 'row-neutral';
+  if (value === "Win")
+    rowClass = 'row-positive';
+  else if (value === "Loss")
+    rowClass = 'row-negative';
+
+  return rowClass;
 };
 
 const formatCurrency = (value) => {

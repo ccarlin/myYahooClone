@@ -23,6 +23,7 @@ h2 {
 }
 .data-table th {
   background-color: #f2f2f2;
+  color: black;
   text-align: left;
 }
 .data-header {
@@ -79,11 +80,6 @@ h2 {
 /* Default light mode styles */
 body.light {
   background-color: #ffffff;
-  color: #000000;
-}
-
-body.light .data-header {
-  background-color: #f0f0f0;
   color: #000000;
 }
 
