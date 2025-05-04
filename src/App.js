@@ -50,15 +50,6 @@ const App = () => {
   const [collapsedCategories, setCollapsedCategories] = useState({}); // Move state here
   const [showTrashIcons, setShowTrashIcons] = useState(true); // State to toggle trash icons
 
-  // Initialize visibility state for all tables
-  const initializeVisibility = (data, prefix) => {
-    const visibility = {};
-    data.forEach((_, index) => {
-      visibility[`${prefix}-${index}`] = true; // Set all tables to visible
-    });
-    return visibility;
-  };
-
   // Toggle table visibility
   const toggleTable = (key) => {
     setVisibleTables((prev) => ({
