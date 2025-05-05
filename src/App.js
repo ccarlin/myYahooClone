@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './MyYahoo.css';
+import $ from 'jquery';
 
 const fetchData = async (endpoint, setState, timestampKey, prefix, setVisibleTables, setTimestamps) => {
   try {
@@ -77,19 +78,19 @@ const App = () => {
   }, [theme]);
 
   const updateStockData = () => {
-    fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps);
+    fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps);
   };
 
   const updateNewsData = () => {
-    fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps);
+    fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps);
   };
 
   const updateSportsData = () => {
-    fetchData('/myYahoo/sportsUpdate', setSportsFeeds, 'sports', 'sports', setVisibleTables, setTimestamps);
+    fetchData('/sportsUpdate', setSportsFeeds, 'sports', 'sports', setVisibleTables, setTimestamps);
   };
 
   const updateWeatherData = () => {
-    fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps);
+    fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps);
   };
 
   useEffect(() => {
@@ -135,7 +136,7 @@ const App = () => {
             <h2>
               Stock Information - <span className="small-text">{timestamps.stock}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon"
-                onClick={() => fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps)}
+                onClick={() => fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps)}
               />
               <img src="config.png" title="Configure Stocks" data-bs-toggle="modal" data-bs-target="#manage-stocks" 
                 width="20px" className="img-link" alt="Manage Stocks" 
@@ -147,7 +148,7 @@ const App = () => {
             <h2>
               News Feed - <span className="small-text">{timestamps.news}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon" 
-                onClick={() => fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps)}
+                onClick={() => fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps)}
               />
               <img src="config.png" title="Configure Feeds" data-bs-toggle="modal" data-bs-target="#manage-rss" 
                 width="20px" className="img-link" alt="Manage Feeds" 
@@ -159,7 +160,7 @@ const App = () => {
             <h2>
               Sports - <span className="small-text">{timestamps.sports}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon"
-                onClick={() => fetchData('/myYahoo/sportsUpdate', setSportsFeeds, 'sports', 'sports', setVisibleTables, setTimestamps)}
+                onClick={() => fetchData('/sportsUpdate', setSportsFeeds, 'sports', 'sports', setVisibleTables, setTimestamps)}
               />
               <img src="config.png" title="Configure Sports" data-bs-toggle="modal" data-bs-target="#manage-sports" 
                 width="20px" className="img-link" alt="Manage Sports" 
@@ -175,7 +176,7 @@ const App = () => {
             <h2>
               Weather Information - <span className="small-text">{timestamps.weather}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon"
-                onClick={() => fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps)}
+                onClick={() => fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps)}
               />
               <img src="config.png" title="Configure Weather" data-bs-toggle="modal" data-bs-target="#manage-weather" 
                 width="20px" className="img-link" alt="Manage Weather" />
@@ -329,7 +330,7 @@ const App = () => {
 const buildStockTables = (stockInfo, toggleTable, visibleTables, setStockInfo, showTrashIcons, setVisibleTables, setTimestamps) => {
   const removeStock = async (portfolioName, stockSymbol, setVisibleTables, setTimestamps) => {
     try {
-      const url = 'http://localhost:5000/myYahoo/removeStock';
+      const url = 'http://localhost:5000/removeStock';
       const response = await fetch(url, {      
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -340,7 +341,7 @@ const buildStockTables = (stockInfo, toggleTable, visibleTables, setStockInfo, s
       if (result.success) {
         alert(result.message);
         // Refresh the stock data after deletion
-        fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps);
+        fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps);
       } else {
         alert(result.message);
       }
@@ -409,7 +410,7 @@ const buildStockTables = (stockInfo, toggleTable, visibleTables, setStockInfo, s
 const buildNewsTables = (newsFeeds, toggleTable, visibleTables, collapsedCategories, toggleCategory, fetchData, setNewsFeeds, showTrashIcons, setVisibleTables, setTimestamps) => {
   const removeRSSFeed = async (categoryName, feedName) => {
     try {
-      const url = 'http://localhost:5000/myYahoo/removeRSSFeed';
+      const url = 'http://localhost:5000/removeRSSFeed';
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -420,7 +421,7 @@ const buildNewsTables = (newsFeeds, toggleTable, visibleTables, collapsedCategor
       if (result.success) {
         alert(result.message);
         // Refresh the news feeds after deletion
-        fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps);
+        fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps);
       } else {
         alert(result.message);
       }
@@ -562,7 +563,7 @@ const buildSportsTables = (sportsFeeds, toggleTable, visibleTables) => {
 const buildWeatherTables = (weatherInfo, toggleTable, visibleTables, setWeatherInfo, showTrashIcons, setVisibleTables, setTimestamps) => {
   const removeWeatherLocation = async (locationName) => {
     try {
-      const url = 'http://localhost:5000/myYahoo/removeWeatherLocation';
+      const url = 'http://localhost:5000/removeWeatherLocation';
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -573,7 +574,7 @@ const buildWeatherTables = (weatherInfo, toggleTable, visibleTables, setWeatherI
       if (result.success) {
         alert(result.message);
         // Refresh the weather data after deletion
-        fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps);
+        fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps);
       } else {
         alert(result.message);
       }
@@ -699,7 +700,7 @@ const addStock = async (setVisibleTables, setTimestamps) => {
   }
 
   try {
-    const url = 'http://localhost:5000/myYahoo/addStock';
+    const url = 'http://localhost:5000/addStock';
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json'},
@@ -710,7 +711,7 @@ const addStock = async (setVisibleTables, setTimestamps) => {
     if (result.success) {
       alert(result.message);
       // Refresh the stock data after adding
-      fetchData('/myYahoo/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps);
+      fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps);
 
       // Close the modal
       const modalElement = document.getElementById('manage-stocks');
@@ -736,7 +737,7 @@ const addRSSFeed = async (setVisibleTables, setTimestamps, setNewsFeeds) => {
   }
 
   try {
-    const url = 'http://localhost:5000/myYahoo/addRSSFeed';
+    const url = 'http://localhost:5000/addRSSFeed';
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -747,7 +748,7 @@ const addRSSFeed = async (setVisibleTables, setTimestamps, setNewsFeeds) => {
     if (result.success) {
       alert(result.message);
       // Refresh the news feeds after adding
-      fetchData('/myYahoo/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps);
+      fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps);
     
       // Close the modal
       const modalElement = document.getElementById('manage-rss');
@@ -775,7 +776,7 @@ const getLocations = async () => {
 
   try {
     // Call the external REST endpoint
-    const url = 'http://localhost:5000/myYahoo/searchLocation';
+    const url = 'http://localhost:5000/searchLocation';
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -837,7 +838,7 @@ const addWeatherLocation = async (setWeatherInfo, setVisibleTables, setTimestamp
 
   try {
     // Send the location data to the server
-    const url = 'http://localhost:5000/myYahoo/addWeatherLocation';
+    const url = 'http://localhost:5000/addWeatherLocation';
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -848,7 +849,7 @@ const addWeatherLocation = async (setWeatherInfo, setVisibleTables, setTimestamp
     if (result.success) {
       alert(result.message);
       // Refresh the weather data after adding the location
-      fetchData('/myYahoo/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps);
+      fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps);
 
       // Close the modal
       const modalElement = document.getElementById('manage-weather');
@@ -874,7 +875,7 @@ const fetchTeamsForLeague = async () => {
 
   try {
     // Call the server-side getTeamList method
-    const url = "http://localhost:5000/myYahoo/getTeamList";
+    const url = "http://localhost:5000/getTeamList";
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -972,7 +973,7 @@ const saveSelectedTeams = async (setVisibleTables, setTimestamps, setSportsFeeds
   }
 
   try {
-    const url = 'http://localhost:5000/myYahoo/saveSelectedTeams';
+    const url = 'http://localhost:5000/saveSelectedTeams';
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -981,7 +982,7 @@ const saveSelectedTeams = async (setVisibleTables, setTimestamps, setSportsFeeds
     const result = await response.json();
     if (result.success) {
       alert(result.message);
-      fetchData('/myYahoo/sportsUpdate', setSportsFeeds, 'sports', 'sports', setVisibleTables, setTimestamps);
+      fetchData('/sportsUpdate', setSportsFeeds, 'sports', 'sports', setVisibleTables, setTimestamps);
       
       // Close the modal
       const modalElement = document.getElementById('manage-sports');
@@ -995,5 +996,17 @@ const saveSelectedTeams = async (setVisibleTables, setTimestamps, setSportsFeeds
     alert('An error occurred while saving the selected teams.');
   }
 };
+
+function updateCollapsedState(section, name, collapsed) {
+  const fileName = sessionStorage.getItem('fileName'); // Retrieve the file name from session storage
+
+  $.post('/myYahoo/updateCollapsedState', { section, name, collapsed, fileName }, function (response) {
+    if (!response.success) {
+      alert(response.message);
+    }
+  }).fail(function () {
+    alert('An error occurred while updating the collapsed state.');
+  });
+}
 
 export default App;
