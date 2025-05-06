@@ -2,28 +2,13 @@ import React, { useState, useEffect } from 'react';
 import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './MyYahoo.css';
-import $ from 'jquery';
 
-const fetchData = async (endpoint, setState, timestampKey, prefix, setVisibleTables, setTimestamps) => {
+const fetchData = async (endpoint, setState, timestampKey, prefix, setTimestamps) => {
   try {
     const url = `http://localhost:5000${endpoint}`;
     const response = await fetch(url, { method: 'POST' });
     const data = await response.json();
     setState(data);
-
-    // Initialize visibility for the fetched data
-    const initializeVisibility = (data, prefix) => {
-      const visibility = {};
-      data.forEach((_, index) => {
-        visibility[`${prefix}-${index}`] = true; // Set all tables to visible
-      });
-      return visibility;
-    };
-
-    setVisibleTables((prev) => ({
-      ...prev,
-      ...initializeVisibility(data, prefix),
-    }));
 
     setTimestamps((prev) => ({
       ...prev,
@@ -46,18 +31,8 @@ const App = () => {
     weather: '',
   });
 
-  const [visibleTables, setVisibleTables] = useState({}); // State to track table visibility
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light'); // Load theme from localStorage
-  const [collapsedCategories, setCollapsedCategories] = useState({}); // Move state here
   const [showTrashIcons, setShowTrashIcons] = useState(true); // State to toggle trash icons
-
-  // Toggle table visibility
-  const toggleTable = (key) => {
-    setVisibleTables((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
 
   // Toggle theme and save to localStorage
   const toggleTheme = () => {
@@ -66,31 +41,24 @@ const App = () => {
     localStorage.setItem('theme', newTheme);
   };
 
-  const toggleCategory = (categoryIndex) => {
-    setCollapsedCategories((prev) => ({
-      ...prev,
-      [categoryIndex]: !prev[categoryIndex],
-    }));
-  };
-
   useEffect(() => {
     document.body.className = theme; // Apply theme to the body
   }, [theme]);
 
   const updateStockData = () => {
-    fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps);
+    fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setTimestamps);
   };
 
   const updateNewsData = () => {
-    fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps);
+    fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setTimestamps);
   };
 
   const updateSportsData = () => {
-    fetchData('/sportsUpdate', setSportsFeeds, 'sports', 'sports', setVisibleTables, setTimestamps);
+    fetchData('/sportsUpdate', setSportsFeeds, 'sports', 'sports', setTimestamps);
   };
 
   const updateWeatherData = () => {
-    fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps);
+    fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setTimestamps);
   };
 
   useEffect(() => {
@@ -100,24 +68,6 @@ const App = () => {
     updateWeatherData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    // Initialize visibility for news feeds
-    const initializeNewsVisibility = () => {
-      const visibility = {};
-      newsFeeds.forEach((category, categoryIndex) => {
-        category.feeds.forEach((feed, feedIndex) => {
-          visibility[`news-${categoryIndex}-${feedIndex}`] = true; // Set all news tables to visible
-        });
-      });
-      return visibility;
-    };
-
-    setVisibleTables((prev) => ({
-      ...prev,
-      ...initializeNewsVisibility(),
-    }));
-  }, [newsFeeds]);
 
   useEffect(() => {
     // Initialize Bootstrap modals
@@ -136,31 +86,31 @@ const App = () => {
             <h2>
               Stock Information - <span className="small-text">{timestamps.stock}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon"
-                onClick={() => fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps)}
+                onClick={() => fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setTimestamps)}
               />
               <img src="config.png" title="Configure Stocks" data-bs-toggle="modal" data-bs-target="#manage-stocks" 
                 width="20px" className="img-link" alt="Manage Stocks" 
               />
             </h2>
-            {buildStockTables(stockInfo, toggleTable, visibleTables, setStockInfo, showTrashIcons, setVisibleTables, setTimestamps)}
+            {buildStockTables(stockInfo, setStockInfo, showTrashIcons, setTimestamps)}
           </td>
           <td valign="top" width="35%" style={{ paddingLeft: '10px' }} rowSpan="2">
             <h2>
               News Feed - <span className="small-text">{timestamps.news}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon" 
-                onClick={() => fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps)}
+                onClick={() => fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setTimestamps)}
               />
               <img src="config.png" title="Configure Feeds" data-bs-toggle="modal" data-bs-target="#manage-rss" 
                 width="20px" className="img-link" alt="Manage Feeds" 
               />
             </h2>
-            {buildNewsTables(newsFeeds, toggleTable, visibleTables, collapsedCategories, toggleCategory, fetchData, setNewsFeeds, showTrashIcons, setVisibleTables, setTimestamps)}
+            {buildNewsTables(newsFeeds, fetchData, setNewsFeeds, showTrashIcons, setTimestamps)}
           </td>
           <td valign="top" width="35%" style={{ paddingLeft: '10px' }}>
             <h2>
               Sports - <span className="small-text">{timestamps.sports}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon"
-                onClick={() => fetchData('/sportsUpdate', setSportsFeeds, 'sports', 'sports', setVisibleTables, setTimestamps)}
+                onClick={() => fetchData('/sportsUpdate', setSportsFeeds, 'sports', 'sports', setTimestamps)}
               />
               <img src="config.png" title="Configure Sports" data-bs-toggle="modal" data-bs-target="#manage-sports" 
                 width="20px" className="img-link" alt="Manage Sports" 
@@ -172,16 +122,16 @@ const App = () => {
                 {showTrashIcons ? 'Hide Trash Icons' : 'Show Trash Icons'}
               </button>
             </h2>        
-            {buildSportsTables(sportsFeeds, toggleTable, visibleTables)}
+            {buildSportsTables(sportsFeeds)}
             <h2>
               Weather Information - <span className="small-text">{timestamps.weather}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon"
-                onClick={() => fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps)}
+                onClick={() => fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setTimestamps)}
               />
               <img src="config.png" title="Configure Weather" data-bs-toggle="modal" data-bs-target="#manage-weather" 
                 width="20px" className="img-link" alt="Manage Weather" />
             </h2>
-            {buildWeatherTables(weatherInfo, toggleTable, visibleTables, setWeatherInfo, showTrashIcons, setVisibleTables, setTimestamps)}
+            {buildWeatherTables(weatherInfo, setWeatherInfo, showTrashIcons, setTimestamps)}
           </td>
         </tr>
       </table>
@@ -208,7 +158,7 @@ const App = () => {
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" onClick={() => addStock(setVisibleTables, setTimestamps)}>Add Stock</button>
+              <button type="button" className="btn btn-primary" onClick={() => addStock(setTimestamps)}>Add Stock</button>
             </div>
           </div>
         </div>
@@ -240,7 +190,7 @@ const App = () => {
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" onClick={() => saveSelectedTeams(setVisibleTables, setTimestamps, setSportsFeeds)}>Save changes</button>
+              <button type="button" className="btn btn-primary" onClick={() => saveSelectedTeams(setTimestamps, setSportsFeeds)}>Save changes</button>
             </div>
           </div>
         </div>
@@ -271,7 +221,7 @@ const App = () => {
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" onClick={() => addRSSFeed(setVisibleTables, setTimestamps, setNewsFeeds)}>Add Feed</button>
+              <button type="button" className="btn btn-primary" onClick={() => addRSSFeed(setTimestamps, setNewsFeeds)}>Add Feed</button>
             </div>
           </div>
         </div>
@@ -313,7 +263,7 @@ const App = () => {
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => addWeatherLocation(setWeatherInfo, setVisibleTables, setTimestamps)}               
+                onClick={() => addWeatherLocation(setWeatherInfo, setTimestamps)}               
               >
                 Add Location
               </button>
@@ -327,8 +277,8 @@ const App = () => {
 };  
 
 // Updated helper functions
-const buildStockTables = (stockInfo, toggleTable, visibleTables, setStockInfo, showTrashIcons, setVisibleTables, setTimestamps) => {
-  const removeStock = async (portfolioName, stockSymbol, setVisibleTables, setTimestamps) => {
+const buildStockTables = (stockInfo, setStockInfo, showTrashIcons, setTimestamps) => {
+  const removeStock = async (portfolioName, stockSymbol, setTimestamps) => {
     try {
       const url = 'http://localhost:5000/removeStock';
       const response = await fetch(url, {      
@@ -341,7 +291,7 @@ const buildStockTables = (stockInfo, toggleTable, visibleTables, setStockInfo, s
       if (result.success) {
         alert(result.message);
         // Refresh the stock data after deletion
-        fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps);
+        fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setTimestamps);
       } else {
         alert(result.message);
       }
@@ -353,75 +303,92 @@ const buildStockTables = (stockInfo, toggleTable, visibleTables, setStockInfo, s
 
   return stockInfo.map((portfolio, index) => (
     <div key={index}>
-      <div className="data-header" onClick={() => toggleTable(`stock-${index}`)}>
+      <div
+        className="data-header"
+        onClick={() => {
+          const tableId = `stock-${index}`;
+          const table = document.getElementById(tableId);
+
+          if (table) {
+            // Toggle the table's visibility
+            const isCollapsed = table.style.display === 'none' ? false : true;
+            table.style.display = isCollapsed ? 'none' : 'table';
+
+            // Update the collapsed state in the database
+            updateCollapsedState('Portfolios', portfolio.name, !isCollapsed);
+          }
+        }}
+      >
         {portfolio.name}
       </div>
-      {visibleTables[`stock-${index}`] && (
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Symbol</th>
-              <th>Price</th>
-              <th>Change</th>
-              <th>Change %</th>
-              <th></th>
+      <table
+        id={`stock-${index}`}
+        className="data-table"
+        style={{ display: portfolio.collapsed ? 'none' : 'table' }} // Conditionally hide the table
+      >
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Symbol</th>
+            <th>Price</th>
+            <th>Change</th>
+            <th>Change %</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {portfolio.portfolioData.map((stock, idx) => (
+            <tr key={idx} className={getRowClass(stock.change)}>
+              <td>
+                <a
+                  href={`https://finance.yahoo.com/quote/${stock.symbol}/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {stock.name}
+                </a>
+              </td>
+              <td>{stock.symbol}</td>
+              <td>{formatCurrency(stock.price)}</td>
+              <td>{formatCurrency(stock.change || 0)}</td>
+              <td>{stock.changePercent !== undefined ? stock.changePercent.toFixed(2) + '%' : 'N/A'}</td>
+              <td>
+                <span
+                  className="trash-icon"
+                  onClick={() => removeStock(portfolio.name, stock.symbol, setTimestamps)}
+                  style={{
+                    cursor: 'pointer',
+                    color: 'red',
+                    display: showTrashIcons ? 'inline' : 'none',
+                  }}
+                  title="Remove Stock"
+                >
+                  🗑️
+                </span>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {portfolio.portfolioData.map((stock, idx) => (
-              <tr key={idx} className={getRowClass(stock.change)}>
-                <td>
-                  <a
-                    href={`https://finance.yahoo.com/quote/${stock.symbol}/`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {stock.name}
-                  </a>
-                </td>
-                <td>{stock.symbol}</td>
-                <td>{formatCurrency(stock.price)}</td>
-                <td>{formatCurrency(stock.change || 0)}</td>
-                <td>{stock.changePercent !== undefined ? stock.changePercent.toFixed(2) + '%' : 'N/A'}</td>
-                <td>
-                  <span
-                    className="trash-icon"
-                    onClick={() => removeStock(portfolio.name, stock.symbol, setVisibleTables, setTimestamps)}
-                    style={{
-                      cursor: 'pointer',
-                      color: 'red',
-                      display: showTrashIcons ? 'inline' : 'none', 
-                    }}
-                    title="Remove Stock"
-                  >
-                    🗑️
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          ))}
+        </tbody>
+      </table>
     </div>
   ));
 };
 
-const buildNewsTables = (newsFeeds, toggleTable, visibleTables, collapsedCategories, toggleCategory, fetchData, setNewsFeeds, showTrashIcons, setVisibleTables, setTimestamps) => {
+const buildNewsTables = (newsFeeds, fetchData, setNewsFeeds, showTrashIcons, setTimestamps) => {
   const removeRSSFeed = async (categoryName, feedName) => {
     try {
       const url = 'http://localhost:5000/removeRSSFeed';
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category: categoryName, feedName })
+        body: JSON.stringify({ category: categoryName, feedName }),
       });
 
       const result = await response.json();
       if (result.success) {
         alert(result.message);
         // Refresh the news feeds after deletion
-        fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps);
+        fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setTimestamps);
       } else {
         alert(result.message);
       }
@@ -436,15 +403,25 @@ const buildNewsTables = (newsFeeds, toggleTable, visibleTables, collapsedCategor
       {/* Category Header */}
       <h3
         className="data-header"
-        onClick={() => toggleCategory(categoryIndex)}
+        onClick={() => {
+          const categoryContainer = document.getElementById(`category-container-${categoryIndex}`);
+          if (categoryContainer) {
+            // Toggle visibility of all tables in this category
+            const isCollapsed = categoryContainer.style.display === 'none' ? false : true;
+            categoryContainer.style.display = isCollapsed ? 'none' : 'block';
+
+            // Update the collapsed state in the database
+            updateCollapsedState('NewsCategories', category.category, !isCollapsed);
+          }
+        }}
         style={{ cursor: 'pointer' }}
       >
         {category.category}
       </h3>
 
       {/* Category Content */}
-      {!collapsedCategories[categoryIndex] &&
-        category.feeds.map((feed, feedIndex) => (
+      <div id={`category-container-${categoryIndex}`} style={{ display: category.collapsed ? 'none' : 'block' }}>
+        {category.feeds.map((feed, feedIndex) => (
           <div key={feedIndex}>
             {/* Feed Table */}
             <table className="data-table">
@@ -452,7 +429,7 @@ const buildNewsTables = (newsFeeds, toggleTable, visibleTables, collapsedCategor
                 <tr className="data-header">
                   <th
                     colSpan="1"
-                    onClick={() => toggleTable(`news-${categoryIndex}-${feedIndex}`)}
+                    onClick={(e) => toggleTableData(e.target, feed.name, category.category)} // Call toggleTableData
                     style={{ cursor: 'pointer', textAlign: 'left', position: 'relative' }}
                   >
                     {feed.name}
@@ -462,9 +439,9 @@ const buildNewsTables = (newsFeeds, toggleTable, visibleTables, collapsedCategor
                       style={{
                         cursor: 'pointer',
                         color: 'red',
-                        display: showTrashIcons ? 'inline' : 'none', 
+                        display: showTrashIcons ? 'inline' : 'none',
                         position: 'absolute',
-                        right: '10px'
+                        right: '10px',
                       }}
                       title="Remove RSS Feed"
                     >
@@ -473,27 +450,29 @@ const buildNewsTables = (newsFeeds, toggleTable, visibleTables, collapsedCategor
                   </th>
                 </tr>
               </thead>
-              {visibleTables[`news-${categoryIndex}-${feedIndex}`] && (
-                <tbody>
-                  {feed.feedData.items.map((item, itemIndex) => (
-                    <tr key={item.guid || itemIndex}>
-                      <td colSpan="2">
-                        <a href={item.link} target="_blank" rel="noopener noreferrer">
-                          {item.title}
-                        </a>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              )}
+              <tbody>
+                {feed.feedData.items.map((item, itemIndex) => (
+                  <tr
+                    key={item.guid || itemIndex}
+                    style={{ display: feed.feedData.collapsed ? 'none' : '' }} // Conditionally hide the row
+                  >
+                    <td colSpan="2">
+                      <a href={item.link} target="_blank" rel="noopener noreferrer">
+                        {item.title}
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
         ))}
+      </div>
     </div>
   ));
 };
 
-const buildSportsTables = (sportsFeeds, toggleTable, visibleTables) => {
+const buildSportsTables = (sportsFeeds) => {
   return sportsFeeds
     .filter(
       (sport) =>
@@ -502,79 +481,96 @@ const buildSportsTables = (sportsFeeds, toggleTable, visibleTables) => {
     )
     .map((sport, index) => (
       <div key={index}>
-        <div className="data-header" onClick={() => toggleTable(`sports-${index}`)}>
+        <div
+          className="data-header"
+          onClick={() => {
+            const tableId = `sports-${index}`;
+            const table = document.getElementById(tableId);
+
+            if (table) {
+              // Toggle the table's visibility
+              const isCollapsed = table.style.display === 'none' ? false : true;
+              table.style.display = isCollapsed ? 'none' : 'table';
+
+              // Update the collapsed state in the database
+              updateCollapsedState('Sports', sport.name, !isCollapsed);
+            }
+          }}
+        >
           {sport.name}
         </div>
-        {visibleTables[`sports-${index}`] && (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Date/Event</th>
-                <th>Home</th>
-                <th>Away</th>
-                <th>Status</th>
-                <th>Result</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sport.sportData.map((data, dataIndex) =>
-                data.items.map((item, itemIndex) => (
-                  <tr key={`${dataIndex}-${itemIndex}`} className={getRowClass(item.result)}>
-                    <td>
-                      {item.date} /{' '}
-                      <a href={item.link} target="_blank" rel="noopener noreferrer">
-                        {item.title}
+        <table
+          id={`sports-${index}`}
+          className="data-table"
+          style={{ display: sport.collapsed ? 'none' : 'table' }} // Conditionally hide the table
+        >
+          <thead>
+            <tr>
+              <th>Date/Event</th>
+              <th>Home</th>
+              <th>Away</th>
+              <th>Status</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sport.sportData.map((data, dataIndex) =>
+              data.items.map((item, itemIndex) => (
+                <tr key={`${dataIndex}-${itemIndex}`} className={getRowClass(item.result)}>
+                  <td>
+                    {item.date} /{' '}
+                    <a href={item.link} target="_blank" rel="noopener noreferrer">
+                      {item.title}
+                    </a>
+                  </td>
+                  <td style={{ fontSize: '28px' }} width="112px">
+                    <img src={item.home_logo} alt="Home Logo" width="42" /> {item.home_score}
+                  </td>
+                  <td style={{ fontSize: '28px' }} width="112px">
+                    <img src={item.away_logo} alt="Away Logo" width="42" /> {item.away_score}
+                  </td>
+                  <td>
+                    {item.box_score ? (
+                      <a href={item.box_score} target="_blank" rel="noopener noreferrer">
+                        {item.status}
                       </a>
-                    </td>
-                    <td style={{ fontSize: '28px' }} width="112px">
-                      <img src={item.home_logo} alt="Home Logo" width="42" /> {item.home_score}
-                    </td>
-                    <td style={{ fontSize: '28px' }} width="112px">
-                      <img src={item.away_logo} alt="Away Logo" width="42" /> {item.away_score}
-                    </td>
-                    <td>
-                      {item.box_score ? (
-                        <a href={item.box_score} target="_blank" rel="noopener noreferrer">
-                          {item.status}
-                        </a>
-                      ) : (
-                        item.status
-                      )}
-                    </td>
-                    <td>
-                      {item.recap ? (
-                        <a href={item.recap} target="_blank" rel="noopener noreferrer">
-                          {item.result}
-                        </a>
-                      ) : (
-                        item.result
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
+                    ) : (
+                      item.status
+                    )}
+                  </td>
+                  <td>
+                    {item.recap ? (
+                      <a href={item.recap} target="_blank" rel="noopener noreferrer">
+                        {item.result}
+                      </a>
+                    ) : (
+                      item.result
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     ));
 };
 
-const buildWeatherTables = (weatherInfo, toggleTable, visibleTables, setWeatherInfo, showTrashIcons, setVisibleTables, setTimestamps) => {
+const buildWeatherTables = (weatherInfo, setWeatherInfo, showTrashIcons, setTimestamps) => {
   const removeWeatherLocation = async (locationName) => {
     try {
       const url = 'http://localhost:5000/removeWeatherLocation';
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ locationName })
+        body: JSON.stringify({ locationName }),
       });
 
       const result = await response.json();
       if (result.success) {
         alert(result.message);
         // Refresh the weather data after deletion
-        fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps);
+        fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setTimestamps);
       } else {
         alert(result.message);
       }
@@ -587,7 +583,22 @@ const buildWeatherTables = (weatherInfo, toggleTable, visibleTables, setWeatherI
   return weatherInfo.map((area, index) => (
     <div key={index}>
       <div className="data-header">
-        <span onClick={() => toggleTable(`weather-${index}`)} style={{ cursor: 'pointer' }}>
+        <span
+          onClick={() => {
+            const tableId = `weather-${index}`;
+            const table = document.getElementById(tableId);
+
+            if (table) {
+              // Toggle the table's visibility
+              const isCollapsed = table.style.display === 'none' ? false : true;
+              table.style.display = isCollapsed ? 'none' : 'table';
+
+              // Update the collapsed state in the database
+              updateCollapsedState('Weather', area.name, !isCollapsed);
+            }
+          }}
+          style={{ cursor: 'pointer' }}
+        >
           {area.name} - {buildDisplay(area.weatherData.current)}
         </span>
         <span
@@ -596,47 +607,49 @@ const buildWeatherTables = (weatherInfo, toggleTable, visibleTables, setWeatherI
           style={{
             cursor: 'pointer',
             color: 'red',
-            display: showTrashIcons ? 'inline' : 'none', 
+            display: showTrashIcons ? 'inline' : 'none',
             position: 'absolute',
-            right: '10px'
+            right: '10px',
           }}
           title="Remove Weather Location"
         >
           🗑️
         </span>
       </div>
-      {visibleTables[`weather-${index}`] && (
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Forecast</th>
-              <th>Temp Range</th>
-              <th>Wind</th>
-              <th>Precipitation</th>
-              <th>Sunshine</th>
+      <table
+        id={`weather-${index}`}
+        className="data-table"
+        style={{ display: area.collapsed ? 'none' : 'table' }} // Conditionally hide the table
+      >
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Forecast</th>
+            <th>Temp Range</th>
+            <th>Wind</th>
+            <th>Precipitation</th>
+            <th>Sunshine</th>
+          </tr>
+        </thead>
+        <tbody>
+          {area.weatherData.daily.time.map((time, idx) => (
+            <tr key={idx}>
+              <td>{new Date(time).toLocaleDateString()}</td>
+              <td>{area.weatherData.daily.weatherCode[idx]}</td>
+              <td>
+                {Math.round(area.weatherData.daily.tempMax[idx])}°/
+                {Math.round(area.weatherData.daily.tempMin[idx])}°
+              </td>
+              <td>
+                {degreesToCompass(area.weatherData.daily.windDirection[idx])}{' '}
+                {Math.round(area.weatherData.daily.windSpeed[idx])} MPH
+              </td>
+              <td>{area.weatherData.daily.precipitation[idx]}%</td>
+              <td>{formatSeconds(area.weatherData.daily.sun[idx])}</td>
             </tr>
-          </thead>
-          <tbody>
-            {area.weatherData.daily.time.map((time, idx) => (
-              <tr key={idx}>
-                <td>{new Date(time).toLocaleDateString()}</td>
-                <td>{area.weatherData.daily.weatherCode[idx]}</td>
-                <td>
-                  {Math.round(area.weatherData.daily.tempMax[idx])}°/
-                  {Math.round(area.weatherData.daily.tempMin[idx])}°
-                </td>
-                <td>
-                  {degreesToCompass(area.weatherData.daily.windDirection[idx])}{' '}
-                  {Math.round(area.weatherData.daily.windSpeed[idx])} MPH
-                </td>
-                <td>{area.weatherData.daily.precipitation[idx]}%</td>
-                <td>{formatSeconds(area.weatherData.daily.sun[idx])}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          ))}
+        </tbody>
+      </table>
     </div>
   ));
 };
@@ -689,7 +702,7 @@ const buildDisplay = (area) => {
     return display;
 }
 
-const addStock = async (setVisibleTables, setTimestamps) => {
+const addStock = async (setTimestamps) => {
   const portfolioName = document.getElementById('portfolio-name').value.trim();
   const stockSymbol = document.getElementById('stock-symbol').value.trim();
   const setStockInfo = (data) => console.log('setStockInfo is not defined in this scope. Replace this with actual implementation.');
@@ -711,7 +724,7 @@ const addStock = async (setVisibleTables, setTimestamps) => {
     if (result.success) {
       alert(result.message);
       // Refresh the stock data after adding
-      fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setVisibleTables, setTimestamps);
+      fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setTimestamps);
 
       // Close the modal
       const modalElement = document.getElementById('manage-stocks');
@@ -726,7 +739,7 @@ const addStock = async (setVisibleTables, setTimestamps) => {
   }
 };
 
-const addRSSFeed = async (setVisibleTables, setTimestamps, setNewsFeeds) => {
+const addRSSFeed = async (setTimestamps, setNewsFeeds) => {
   const category = document.getElementById('rss-category').value.trim();
   const name = document.getElementById('rss-name').value.trim();
   const rssUrl = document.getElementById('rss-url').value.trim();
@@ -748,7 +761,7 @@ const addRSSFeed = async (setVisibleTables, setTimestamps, setNewsFeeds) => {
     if (result.success) {
       alert(result.message);
       // Refresh the news feeds after adding
-      fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setVisibleTables, setTimestamps);
+      fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setTimestamps);
     
       // Close the modal
       const modalElement = document.getElementById('manage-rss');
@@ -820,7 +833,7 @@ const getLocations = async () => {
   }
 };
 
-const addWeatherLocation = async (setWeatherInfo, setVisibleTables, setTimestamps) => {
+const addWeatherLocation = async (setWeatherInfo, setTimestamps) => {
   // Get the selected location from the radio buttons
   const selectedLocation = document.querySelector('input[name="locationRadio"]:checked');
   if (!selectedLocation) {
@@ -849,7 +862,7 @@ const addWeatherLocation = async (setWeatherInfo, setVisibleTables, setTimestamp
     if (result.success) {
       alert(result.message);
       // Refresh the weather data after adding the location
-      fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setVisibleTables, setTimestamps);
+      fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setTimestamps);
 
       // Close the modal
       const modalElement = document.getElementById('manage-weather');
@@ -951,7 +964,7 @@ const fetchTeamsForLeague = async () => {
   }
 };
 
-const saveSelectedTeams = async (setVisibleTables, setTimestamps, setSportsFeeds) => {
+const saveSelectedTeams = async (setTimestamps, setSportsFeeds) => {
   const leagueSelector = document.getElementById('league-selector');
   const selectedLeague = leagueSelector.value;
 
@@ -982,7 +995,7 @@ const saveSelectedTeams = async (setVisibleTables, setTimestamps, setSportsFeeds
     const result = await response.json();
     if (result.success) {
       alert(result.message);
-      fetchData('/sportsUpdate', setSportsFeeds, 'sports', 'sports', setVisibleTables, setTimestamps);
+      fetchData('/sportsUpdate', setSportsFeeds, 'sports', 'sports', setTimestamps);
       
       // Close the modal
       const modalElement = document.getElementById('manage-sports');
@@ -997,16 +1010,33 @@ const saveSelectedTeams = async (setVisibleTables, setTimestamps, setSportsFeeds
   }
 };
 
-function updateCollapsedState(section, name, collapsed) {
-  const fileName = sessionStorage.getItem('fileName'); // Retrieve the file name from session storage
+        // Hide the table when clicking the header
+function toggleTableData(header, name, category) {
+  const table = header.closest('table');
+  const alltr = table.querySelectorAll("tr");
+  const isCollapsed = alltr[1].style.display === "none" ? true : false; 
+  for (var i = 1; i < alltr.length; i++) {
+      alltr[i].style.display = (alltr[i].style.display === "none") ? "" : "none";
+  }
+  
+  updateCollapsedState("NewsFeeds", category + ":" + name, isCollapsed); // Update the collapsed state in the database            
+}  
 
-  $.post('/myYahoo/updateCollapsedState', { section, name, collapsed, fileName }, function (response) {
-    if (!response.success) {
-      alert(response.message);
+const updateCollapsedState = async (section, name, collapsed) => {
+  try {
+    const url = 'http://localhost:5000/updateCollapsedState';
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ section, name, collapsed: !collapsed }),
+    });
+    const result = await response.json();
+    if (!result.success) {
+      alert(result.message);
     }
-  }).fail(function () {
+  } catch (error) {
     alert('An error occurred while updating the collapsed state.');
-  });
-}
-
+  }
+};
+ 
 export default App;
