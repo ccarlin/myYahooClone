@@ -1,27 +1,5 @@
 {
-  "Portfolios": [
-    {
-      "name": "Quotes",
-      "stockList": [
-        "AKAM",
-        "AMGN",
-        "AMZN",
-        "CMCSA",
-        "CSCO",
-        "EQR",
-        "GAP",
-        "GSK",
-        "HD",
-        "KO",
-        "MDRX",
-        "MRK",
-        "MSFT",
-        "PG",
-        "TEMWX",
-        "TGT"
-      ],
-      "collapsed": false
-    },
+  "Portfolios": [    
     {
       "name": "Watchlist",
       "stockList": [
@@ -41,54 +19,10 @@
       "collapsed": false
     },
     {
-      "name": "ML Suggestions",
-      "stockList": [
-        "PGR",
-        "COP",
-        "GOOG",
-        "HCA",
-        "HON",
-        "LOW",
-        "NFLX",
-        "NOW",
-        "PEP",
-        "TJX",
-        "V",
-        "WMT",
-        "XOM",
-        "ZTS"
-      ],
-      "collapsed": true
-    },
-    {
-      "name": "ML Watchlist",
-      "stockList": [
-        "BA",
-        "BMRN",
-        "BMY",
-        "C",
-        "DOV",
-        "JPM",
-        "MRVL",
-        "QCOM",
-        "RTX",
-        "TEAM",
-        "URI"
-      ],
+      "name": "Random Stocks",
+      "stockList": ["PGR", "COP", "GOOG", "HCA", "HON", "LOW", "NFLX", "NOW", "PEP", "TJX", "V", "WMT", "XOM", "ZTS"],
       "collapsed": false
-    },
-    {
-      "name": "2021 Watchlist",
-      "stockList": [
-        "ALL",
-        "AMAT",
-        "CIVI",
-        "CVS",
-        "NWL",
-        "PH"
-      ],
-      "collapsed": false
-    },
+    },   
     {
       "name": "Security Industry",
       "stockList": [
