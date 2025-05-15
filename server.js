@@ -157,8 +157,12 @@ async function getNewsFeedInfo(feedList)
                 category.feeds[j].feedData = feedData;
             } catch (err) {
                 console.log(`Error pulling news feed: ${feed.url}, Error: ${err}`);
+                // Mark the feed for removal
+                category.feeds[j].toRemove = true;
             }
         }
+        // Remove feeds marked for removal
+        category.feeds = category.feeds.filter(feed => !feed.toRemove);
     }
 
     return feedList;
