@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './MyYahoo.css';
 import { fetchData } from './api';
