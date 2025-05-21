@@ -236,23 +236,35 @@ const App = () => {
             </div>
             <div className="modal-body">
               <form id="add-weather-location-form">
-                <div className="mb-3 d-flex align-items-center">
-                  <label htmlFor="weather-location" className="form-label me-2">Location</label>
-                  <input
-                    id="weather-location"
-                    className="form-control"
-                    type="text"
-                    placeholder="Enter city or zip"
-                    style={{ flex: 1 }}
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-secondary ms-2"
-                    onClick={() => getLocations()}
-                  >
-                    Lookup Location
-                  </button>
-                </div>
+                <table style={{ width: "100%" }}>
+                  <tr style={{ paddingBottom: "12px", height: "48px" }}>
+                    <td style={{ width: "120px", verticalAlign: "middle" }}>
+                      <label htmlFor="weather-days" className="form-label me-2">Days</label>                      
+                    </td>
+                    <td style={{ verticalAlign: "middle" }} colSpan="2">
+                      <input id="weather-days" className="form-control" type="number" min="1" max="7" defaultValue="3" style={{ width: "80px" }} />
+                    </td>
+                  </tr>
+                  <tr style={{ paddingBottom: "12px", height: "48px" }}>
+                    <td style={{ verticalAlign: "middle" }}>
+                      <label htmlFor="weather-location" className="form-label me-2">Location</label>
+                    </td>
+                    <td style={{ verticalAlign: "middle" }} colSpan="2">
+                      <input id="weather-location" className="form-control" type="text" placeholder="Enter city or zip" style={{ flex: 1 }} />                      
+                    </td>
+                  </tr>                  
+                  <tr style={{ paddingBottom: "12px", height: "48px" }}>
+                    <td style={{ verticalAlign: "middle" }}>
+                      <label className="form-check-label" htmlFor="weather-international">International</label>
+                    </td>
+                    <td style={{ verticalAlign: "middle" }}>
+                      <input id="weather-international" className="form-check-input" type="checkbox" /> 
+                    </td>
+                    <td style={{ verticalAlign: "middle" }} align="right">
+                      <button type="button" className="btn btn-secondary ms-2" onClick={() => getLocations()} >Lookup Location</button>
+                    </td>
+                  </tr>
+                </table>               
                 <div id="location-result">
                   <p>Search for a location first in order to add one!</p>
                 </div>
@@ -783,6 +795,8 @@ const getLocations = async () => {
     return;
   }
 
+  const international = document.getElementById('weather-international').checked;
+  
   // Clear previous results
   const locationResultElement = document.getElementById('location-result');
   locationResultElement.innerHTML = '';
@@ -793,7 +807,7 @@ const getLocations = async () => {
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ locationName: location })
+      body: JSON.stringify({ locationName: location, international }),
     });
 
     const result = await response.json();
@@ -843,6 +857,7 @@ const addWeatherLocation = async (setWeatherInfo, setTimestamps) => {
 
   // Extract location details from the selected radio button's value
   const [locationName, latitude, longitude] = selectedLocation.value.split('|').map((value) => value.trim());
+  const days = document.getElementById('weather-days').value.trim();
 
   if (!locationName || !latitude || !longitude) {
     alert('Invalid location data. Please try again.');
@@ -855,7 +870,7 @@ const addWeatherLocation = async (setWeatherInfo, setTimestamps) => {
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ locationName, latitude, longitude }),
+      body: JSON.stringify({ locationName, latitude, longitude, days }),
     });
     const result = await response.json();
 

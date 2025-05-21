@@ -221,7 +221,7 @@ async function getWeatherData(area)
         "precipitation_unit": "inch",
         "timeformat": "unixtime",
         "timezone": "America/Chicago",
-        "forecast_days": 3
+        "forecast_days": area.days ? area.days : 3 // Use area.days if set, otherwise default to 3
     };
     const url = "https://api.open-meteo.com/v1/forecast";
     const responses = await fetchWeatherApi(url, params);
@@ -579,6 +579,7 @@ app.post('/addWeatherLocation', async function (req, res) {
     let locationName = req.body.locationName;
     let latitude = req.body.latitude;   
     let longitude = req.body.longitude;
+    let days = req.body.days || 3; // Default to 3 days if not provided
 
     // Check if the location already exists
     let existingLocation = jsonData.WeatherAreas.find(area => area.name === locationName);
@@ -591,6 +592,7 @@ app.post('/addWeatherLocation', async function (req, res) {
         name: locationName,
         latitude: latitude,
         longitude: longitude,
+        days: days,
         collapsed: false // Set collapsed to false by default
     });
 
@@ -602,13 +604,18 @@ app.post('/addWeatherLocation', async function (req, res) {
 
 app.post('/searchLocation', async function (req, res) {
     const locationName = req.body.locationName;
+    // Convert string "true"/"false" to boolean
+    const international = req.body.international === true || req.body.international === 'true';
 
     if (!locationName) {
         return res.send({ success: false, message: 'Location name is required.' });
     }
 
-    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationName)}&count=10&language=en&format=json&countryCode=US`;
-
+    let url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationName)}&count=10&language=en&format=json&countryCode=US`;
+    if (international === true) {
+        url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationName)}&count=10&language=en&format=json`;
+    }
+    
     try {
         const response = await axios.get(url);
         if (response.data && response.data.results && response.data.results.length > 0) {
