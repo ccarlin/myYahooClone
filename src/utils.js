@@ -1,10 +1,15 @@
 export const getRowClass = (value) => {
-  let rowClass = 'row-neutral';
-  if (value === "Win")
-    rowClass = 'row-positive';
-  else if (value === "Loss")
-    rowClass = 'row-negative';
-  return rowClass;
+  if (typeof value === "string") {
+    if (value === "Win") return 'row-positive';
+    if (value === "Loss") return 'row-negative';
+    return 'row-neutral';
+  }
+  if (typeof value === "number") {
+    if (value > 0) return 'row-positive';
+    if (value < 0) return 'row-negative';
+    return 'row-neutral';
+  }
+  return 'row-neutral';
 };
 
 export const formatCurrency = (value) => {
