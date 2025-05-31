@@ -14,7 +14,7 @@ In the project directory, you can run:
  ### `npm start`
 
 Runs the UI portion of the app in.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Open [http://localhost:3399](http://localhost:3399) to view it in your browser.
 
 
 ## Running with Docker Compose
@@ -30,7 +30,7 @@ This application can be built and run using Docker Compose. This setup includes 
 1.  **Clone the repository (if you haven't already):**
     ```bash
     git clone https://github.com/ccarlin/myYahooClone.git
-    cd <repository-directory>
+    cd myYahooClone
     ```
 
 2.  **Build and run the application:**
@@ -42,7 +42,7 @@ This application can be built and run using Docker Compose. This setup includes 
     *   `-d`: Runs the containers in detached mode (in the background).
 
 3.  **Accessing the application:**
-    *   The client (frontend) will be available at [http://localhost:3000](http://localhost:3000).
+    *   The client (frontend) will be available at [http://localhost:3399](http://localhost:3399).
     *   The server API will be available at [http://localhost:5000](http://localhost:5000) (though you'll typically interact with it through the client).
 
 4.  **Stopping the application:**
