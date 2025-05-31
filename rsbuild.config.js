@@ -7,5 +7,8 @@ export default defineConfig({
       index: './src/index.js',
     },
   },
+  server: {
+    port: 3399,
+  },
   plugins: [pluginReact()],
 });

@@ -33,10 +33,10 @@ RUN npm install --production --legacy-peer-deps
 # Copy the build output from the builder stage
 COPY --from=builder /usr/src/app/dist ./dist
 
-# Expose port 3000 (or whatever port `serve` will use)
-EXPOSE 3000
+# Expose port 3399 (or whatever port `serve` will use)
+EXPOSE 3399
 
 # Command to serve the app
 # The -s flag indicates that it's a single-page application
 # The -l flag specifies the listener port
-CMD ["npx", "serve", "-s", "./dist", "-l", "3000"]
+CMD ["npx", "serve", "-s", "./dist", "-l", "3399"]
