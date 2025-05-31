@@ -17,7 +17,8 @@
     "react-bootstrap": "^2.10.9",
     "react-dom": "^19.0.0",
     "rss-parser": "^3.13.0",
-    "yahoo-finance2": "^2.13.3"
+    "yahoo-finance2": "^2.13.3",
+    "serve": "^14.2.3"
   },
   "scripts": {
     "start": "rsbuild dev",

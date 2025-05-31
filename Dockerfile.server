@@ -1,0 +1,24 @@
+# Use an official Node.js runtime as a parent image
+FROM node:20-alpine
+
+# Set the working directory in the container
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json (or npm-shrinkwrap.json)
+COPY package.json package-lock.json ./
+
+# Install production dependencies
+RUN npm install --production --legacy-peer-deps
+
+# Copy the rest of the application code
+COPY server.js .
+COPY myyahoo.json .
+
+# Make port 5000 available to the world outside this container
+EXPOSE 5000
+
+# Define environment variable (if needed, though server.js doesn't seem to require one for host/port)
+# ENV NODE_ENV production
+
+# Run the app when the container launches
+CMD ["node", "server.js"]
