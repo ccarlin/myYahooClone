@@ -10,5 +10,10 @@ export default defineConfig({
   server: {
     port: 3399,
   },
+  tools: {
+    htmlPlugin: {
+      title: 'myYahooClone',
+    },
+  },
   plugins: [pluginReact()],
 });
