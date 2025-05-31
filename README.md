@@ -7,36 +7,15 @@ To install project dependencies run:
 
 ## Available Scripts
 
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
 To start the server portion of this app run:
  ### `node server.js`
 
- To change the data just modify the myyahoo.json filefound in the root diretory
+In the project directory, you can run:
+ ### `npm start`
 
+Runs the UI portion of the app in.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
- ### `Sports Team IDs:`
-
- You can find the IDs for the teams you want to add from ESPN's API:
- 
- MLB - https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams
- 
- NHL - https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/teams
- 
- NBA - https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams
- 
- NFL - https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams
- 
-
- I believe there are a few other sports available.  
 
 ## Running with Docker Compose
 
@@ -50,7 +29,7 @@ This application can be built and run using Docker Compose. This setup includes 
 
 1.  **Clone the repository (if you haven't already):**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/ccarlin/myYahooClone.git
     cd <repository-directory>
     ```
 
