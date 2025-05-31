@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./myyahoo.json:/usr/src/app/myyahoo.json
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    ports:
+      - "3000:3000"
+    environment:
+      PUBLIC_API_URL: http://server:5000
+    depends_on:
+      - server
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

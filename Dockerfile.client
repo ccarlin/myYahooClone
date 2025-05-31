@@ -1,0 +1,42 @@
+# Stage 1: Build the React application
+FROM node:20-alpine AS builder
+
+# Set the working directory
+WORKDIR /usr/src/app
+
+# Copy package.json, package-lock.json, and rsbuild.config.js
+COPY package.json package-lock.json ./
+COPY rsbuild.config.js ./
+
+# Copy the public and src directories
+COPY public/ ./public/
+COPY src/ ./src/
+
+# Install dependencies
+RUN npm install --legacy-peer-deps
+
+# Build the application
+RUN npm run build
+
+# Stage 2: Serve the static files from the build
+FROM node:20-alpine
+
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json to install 'serve'
+COPY package.json package-lock.json ./
+
+# Install only 'serve' and production dependencies (though serve is the main one here for this stage)
+# We run a full npm install to ensure 'serve' is available via npx or in node_modules/.bin
+RUN npm install --production --legacy-peer-deps
+
+# Copy the build output from the builder stage
+COPY --from=builder /usr/src/app/dist ./dist
+
+# Expose port 3000 (or whatever port `serve` will use)
+EXPOSE 3000
+
+# Command to serve the app
+# The -s flag indicates that it's a single-page application
+# The -l flag specifies the listener port
+CMD ["npx", "serve", "-s", "./dist", "-l", "3000"]
