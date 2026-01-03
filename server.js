@@ -114,9 +114,10 @@ async function GetPortfolios(portfolioList)
 
 async function getStockPrices(symbols)
 {
+    const yf = new yahooFinance();
     const promises = symbols.map(async (symbol) => {
         try {
-            const quote = await yahooFinance.quote(symbol);
+            const quote = await yf.quote(symbol);
             return {
                 symbol: symbol,
                 name: quote.shortName,

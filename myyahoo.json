@@ -1,5 +1,5 @@
 {
-  "Portfolios": [    
+  "Portfolios": [
     {
       "name": "Watchlist",
       "stockList": [
@@ -20,9 +20,24 @@
     },
     {
       "name": "Random Stocks",
-      "stockList": ["PGR", "COP", "GOOG", "HCA", "HON", "LOW", "NFLX", "NOW", "PEP", "TJX", "V", "WMT", "XOM", "ZTS"],
+      "stockList": [
+        "PGR",
+        "COP",
+        "GOOG",
+        "HCA",
+        "HON",
+        "LOW",
+        "NFLX",
+        "NOW",
+        "PEP",
+        "TJX",
+        "V",
+        "WMT",
+        "XOM",
+        "ZTS"
+      ],
       "collapsed": false
-    },   
+    },
     {
       "name": "Security Industry",
       "stockList": [
@@ -259,7 +274,7 @@
           "name": "St. Louis Blues"
         }
       ],
-      "collapsed": false
+      "collapsed": true
     },
     {
       "name": "NBA",
