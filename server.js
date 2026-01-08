@@ -153,8 +153,18 @@ async function getNewsFeedInfo(feedList)
             let feed = category.feeds[j];
             try {
                 let feedData = await rssParser.parseURL(feed.url);
+                // Validate feedData to prevent bad data from corrupting feeds
+                if (!feedData || typeof feedData !== 'object' || !Array.isArray(feedData.items)) {
+                    throw new Error('Invalid RSS feed data');
+                }
                 feedData.name = feed.name;
                 feedData.items = feedData.items.slice(0, 5); // Limit to 5 items
+                // Strip unnecessary properties from items, keeping only title, contentSnippet, and link
+                feedData.items = feedData.items.map(item => ({
+                    title: item.title,
+                    contentSnippet: item.contentSnippet,
+                    link: item.link
+                }));
                 category.feeds[j].feedData = feedData;
             } catch (err) {
                 console.log(`Error pulling news feed: ${feed.url}, Error: ${err}`);
