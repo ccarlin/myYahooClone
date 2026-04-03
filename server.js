@@ -5,8 +5,7 @@ const bodyParser = require('body-parser');
 const fs = require("fs");
 const yahooFinance = require('yahoo-finance2').default;
 const fetchWeatherApi = require('openmeteo').fetchWeatherApi;
-const RSSParser = require('rss-parser');
-const rssParser = new RSSParser();
+const { parseFeed } = require('feedsmith');
 const axios = require("axios");
 
 const app = express();
@@ -137,6 +136,21 @@ async function getStockPrices(symbols)
     return Promise.all(promises);
 }
 
+// Function to strip HTML and provide plain text similar to contentSnippet
+const stripHtml = (html) => {
+    if (!html) return undefined;
+    // Remove HTML tags
+    let text = html.replace(/<[^>]*>?/gm, '');
+    // Basic HTML entity decoding
+    text = text.replace(/&nbsp;/g, ' ')
+               .replace(/&amp;/g, '&')
+               .replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'");
+    return text.trim();
+};
+
 async function getNewsFeedInfo(feedList)
 {
     // Detect if the feedList is in the old format
@@ -152,19 +166,42 @@ async function getNewsFeedInfo(feedList)
         for (let j = 0; j < category.feeds.length; j++) {
             let feed = category.feeds[j];
             try {
-                let feedData = await rssParser.parseURL(feed.url);
-                // Validate feedData to prevent bad data from corrupting feeds
-                if (!feedData || typeof feedData !== 'object' || !Array.isArray(feedData.items)) {
-                    throw new Error('Invalid RSS feed data');
+                let response = await axios.get(feed.url, {
+                    timeout: 10000,
+                    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' }
+                });
+                let parsedResult = parseFeed(response.data);
+                if (!parsedResult || !parsedResult.feed) {
+                    throw new Error('Failed to parse feed data');
                 }
-                feedData.name = feed.name;
-                feedData.items = feedData.items.slice(0, 5); // Limit to 5 items
-                // Strip unnecessary properties from items, keeping only title, contentSnippet, and link
-                feedData.items = feedData.items.map(item => ({
-                    title: item.title,
-                    contentSnippet: item.contentSnippet,
-                    link: item.link
-                }));
+                let parsed = parsedResult.feed;
+                let items = parsed.items || parsed.entries || [];
+
+                // Validate items to prevent bad data from corrupting feeds
+                if (!Array.isArray(items)) {
+                    throw new Error('Invalid RSS feed items');
+                }
+
+                let feedData = {
+                    title: parsed.title,
+                    description: parsed.description,
+                    link: parsed.link,
+                    pubDate: parsed.pubDate,
+                    language: parsed.language,
+                    copyright: parsed.copyright,
+                    ttl: parsed.ttl,
+                    image: parsed.image,
+                    name: feed.name,
+                    items: items.slice(0, 5).map(item => {
+                        const content = item.description || item.summary || item.contentSnippet || item.content;
+                        return {
+                            title: item.title,
+                            contentSnippet: stripHtml(content),
+                            link: item.link
+                        };
+                    })
+                };
+
                 category.feeds[j].feedData = feedData;
             } catch (err) {
                 console.log(`Error pulling news feed: ${feed.url}, Error: ${err}`);
