@@ -274,7 +274,7 @@
           "name": "St. Louis Blues"
         }
       ],
-      "collapsed": true
+      "collapsed": false
     },
     {
       "name": "NBA",
@@ -300,7 +300,7 @@
           "id": "10"
         }
       ],
-      "collapsed": false
+      "collapsed": true
     },
     {
       "name": "NFL",
@@ -314,13 +314,6 @@
         }
       ],
       "collapsed": false
-    }
-  ],
-  "BrokenFeeds": [
-    {
-      "category": "entertaniment",
-      "name": "TV Fanatic",
-      "url": "https://www.tvfanatic.com/feed/"
     }
   ]
 }

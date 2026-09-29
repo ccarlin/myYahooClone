@@ -1,0 +1,15 @@
+# Normalize line endings to LF, matching the convention already used by
+# nearly every file in this repository.
+#
+# Without this, core.autocrlf=true rewrites line endings at commit time and
+# turns small diffs into whole-file rewrites.
+* text=auto eol=lf
+
+# Binary assets must never be text-converted.
+*.png binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.woff binary
+*.woff2 binary

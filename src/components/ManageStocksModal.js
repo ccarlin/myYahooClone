@@ -24,7 +24,7 @@ const ManageStocksModal = ({ setStockInfo, setTimestamps }) => {
       if (result.success) {
         alert(result.message);
         // Refresh the stock data after adding
-        fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setTimestamps);
+        fetchData('/stockUpdate', setStockInfo, 'stock', setTimestamps);
 
         // Close the modal
         const modalElement = document.getElementById('manage-stocks');

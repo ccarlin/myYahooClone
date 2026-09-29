@@ -25,7 +25,7 @@ const ManageRssModal = ({ setNewsFeeds, setTimestamps }) => {
       if (result.success) {
         alert(result.message);
         // Refresh the news feeds after adding
-        fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setTimestamps);
+        fetchData('/newsUpdate', setNewsFeeds, 'news', setTimestamps);
       
         // Close the modal
         const modalElement = document.getElementById('manage-rss');

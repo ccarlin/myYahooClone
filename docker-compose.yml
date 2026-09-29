@@ -3,8 +3,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.server
+    environment:
+      CORS_ORIGINS: http://localhost:3399,http://127.0.0.1:3399
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     volumes:
       - ./myyahoo.json:/usr/src/app/myyahoo.json
     restart: unless-stopped
@@ -16,7 +18,7 @@ services:
       context: .
       dockerfile: Dockerfile.client
     ports:
-      - "3399:3399"
+      - "127.0.0.1:3399:3399"
     environment:
       PUBLIC_API_URL: http://server:5000
     depends_on:

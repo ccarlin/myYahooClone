@@ -92,7 +92,7 @@ const ManageWeatherModal = ({ setWeatherInfo, setTimestamps }) => {
       if (result.success) {
         alert(result.message);
         // Refresh the weather data after adding the location
-        fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setTimestamps);
+        fetchData('/weatherUpdate', setWeatherInfo, 'weather', setTimestamps);
 
         // Close the modal
         const modalElement = document.getElementById('manage-weather');

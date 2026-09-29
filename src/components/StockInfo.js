@@ -16,7 +16,7 @@ const StockInfo = ({ stockInfo, showTrashIcons, setStockInfo, setTimestamps }) =
       if (result.success) {
         alert(result.message);
         // Refresh the stock data after deletion
-        fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setTimestamps);
+        fetchData('/stockUpdate', setStockInfo, 'stock', setTimestamps);
       } else {
         alert(result.message);
       }

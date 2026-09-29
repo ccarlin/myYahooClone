@@ -16,7 +16,7 @@ const WeatherInfo = ({ weatherInfo, showTrashIcons, setWeatherInfo, setTimestamp
       if (result.success) {
         alert(result.message);
         // Refresh the weather data after deletion
-        fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setTimestamps);
+        fetchData('/weatherUpdate', setWeatherInfo, 'weather', setTimestamps);
       } else {
         alert(result.message);
       }
@@ -40,7 +40,7 @@ const WeatherInfo = ({ weatherInfo, showTrashIcons, setWeatherInfo, setTimestamp
               table.style.display = isCollapsed ? 'none' : 'table';
 
               // Update the collapsed state in the database
-              updateCollapsedState('Weather', area.name, !isCollapsed);
+              updateCollapsedState('WeatherAreas', area.name, !isCollapsed);
             }
           }}
           style={{ cursor: 'pointer' }}

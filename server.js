@@ -1,8 +1,8 @@
-// filepath: d:\Documents\My Projects\my-yahoo-client\server.js
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const fs = require("fs");
+const dns = require("dns").promises;
+const net = require("net");
 const yahooFinance = require('yahoo-finance2').default;
 const fetchWeatherApi = require('openmeteo').fetchWeatherApi;
 const { parseFeed } = require('feedsmith');
@@ -12,9 +12,139 @@ const app = express();
 const PORT = 5000;
 let weatherCodes = {};
 
+const DEFAULT_CORS_ORIGINS = ["http://localhost:3399", "http://127.0.0.1:3399"];
+
+function getAllowedOrigins()
+{
+    const configured = process.env.CORS_ORIGINS;
+    if (!configured)
+    {
+        return DEFAULT_CORS_ORIGINS;
+    }
+    return configured.split(",").map(o => o.trim()).filter(o => o.length > 0);
+}
+
 // Middleware
-app.use(cors());
-app.use(bodyParser.json());
+app.use(cors({ origin: getAllowedOrigins() }));
+app.use(express.json());
+
+// #region URL Safety
+// Feed URLs are user-supplied and fetched server-side, so they are validated
+// against private address space to prevent SSRF into the host's own network.
+function expandIPv6(ip)
+{
+    let value = ip.toLowerCase();
+    let tail = [];
+    const embedded = value.match(/(\d+\.\d+\.\d+\.\d+)$/);
+    if (embedded)
+    {
+        const octets = embedded[1].split('.').map(Number);
+        value = value.slice(0, value.length - embedded[1].length);
+        tail = [
+            ((octets[0] << 8) | octets[1]).toString(16),
+            ((octets[2] << 8) | octets[3]).toString(16),
+        ];
+    }
+
+    const halves = value.split('::');
+    if (halves.length > 2)
+    {
+        return null;
+    }
+    const head = halves[0] ? halves[0].split(':').filter(g => g.length > 0) : [];
+    const rest = halves.length === 2 ? (halves[1] ? halves[1].split(':').filter(g => g.length > 0) : []) : [];
+    const missing = 8 - head.length - rest.length - tail.length;
+    if (missing < 0)
+    {
+        return null;
+    }
+    const groups = halves.length === 2
+        ? [...head, ...Array(missing).fill('0'), ...rest, ...tail]
+        : [...head, ...tail];
+    if (groups.length !== 8)
+    {
+        return null;
+    }
+    return groups.map(g => parseInt(g, 16));
+}
+
+function isPrivateAddress(ip)
+{
+    if (net.isIPv4(ip))
+    {
+        const [a, b] = ip.split('.').map(Number);
+        if (a === 0 || a === 10 || a === 127) return true;
+        if (a === 169 && b === 254) return true;
+        if (a === 172 && b >= 16 && b <= 31) return true;
+        if (a === 192 && b === 168) return true;
+        if (a === 100 && b >= 64 && b <= 127) return true;
+        if (a === 192 && b === 0) return true;
+        if (a === 198 && (b === 18 || b === 19)) return true;
+        if (a >= 224) return true;
+        return false;
+    }
+
+    if (net.isIPv6(ip))
+    {
+        const groups = expandIPv6(ip);
+        if (!groups) return true;
+        // ::ffff:a.b.c.d and ::a.b.c.d embed IPv4; judge them as IPv4.
+        const embedded = groups.slice(0, 5).every(g => g === 0);
+        if (embedded && (groups[5] === 0xffff || groups[5] === 0))
+        {
+            const [hi, lo] = [groups[6], groups[7]];
+            return isPrivateAddress(`${hi >> 8}.${hi & 0xff}.${lo >> 8}.${lo & 0xff}`);
+        }
+        if (groups.every(g => g === 0)) return true;          // ::
+        if (groups.slice(0, 7).every(g => g === 0) && groups[7] === 1) return true; // ::1
+        if ((groups[0] & 0xfe00) === 0xfc00) return true;   // fc00::/7 unique local
+        if ((groups[0] & 0xffc0) === 0xfe80) return true;   // fe80::/10 link-local
+        return false;
+    }
+
+    return true;
+}
+
+async function assertPublicUrl(rawUrl)
+{
+    let parsed;
+    try
+    {
+        parsed = new URL(rawUrl);
+    }
+    catch
+    {
+        throw new Error('Invalid feed URL.');
+    }
+
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:')
+    {
+        throw new Error('Feed URL must use http or https.');
+    }
+
+    let addresses;
+    try
+    {
+        addresses = await dns.lookup(parsed.hostname, { all: true });
+    }
+    catch
+    {
+        throw new Error(`Could not resolve host "${parsed.hostname}".`);
+    }
+
+    if (addresses.length === 0)
+    {
+        throw new Error(`Could not resolve host "${parsed.hostname}".`);
+    }
+
+    if (addresses.some(entry => isPrivateAddress(entry.address)))
+    {
+        throw new Error('Feed URL resolves to a private or reserved address.');
+    }
+
+    return addresses;
+}
+// #endregion
 
 
 // API Endpoints
@@ -61,9 +191,11 @@ app.post('/weatherUpdate', async function(req, res) {
 });
 
 // Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
 
 
 async function GetSportInfo(sportsFeeds)
@@ -166,6 +298,7 @@ async function getNewsFeedInfo(feedList)
         for (let j = 0; j < category.feeds.length; j++) {
             let feed = category.feeds[j];
             try {
+                await assertPublicUrl(feed.url);
                 let response = await axios.get(feed.url, {
                     timeout: 10000,
                     headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' }
@@ -246,13 +379,11 @@ function transformOldToNewFormat(feedList) {
 
 async function getWeatherInfo(areaList)
 {
-    let weatherInfo = [];
     for(let i = 0; i < areaList.length; i++) 
     {
         let area = areaList[i];
         let weatherData = await getWeatherData(area);    
         areaList[i].weatherData = weatherData;   
-        weatherInfo.push(weatherData);
     }
     return areaList;
 }
@@ -476,7 +607,7 @@ function getConfigData()
 
 function saveConfigData(jsonData)
 {
-    fs.writeFileSync("./myYahoo.json", JSON.stringify(jsonData, null, 2)); 
+    fs.writeFileSync("./myyahoo.json", JSON.stringify(jsonData, null, 2)); 
 }
 
 // #endregion
@@ -553,6 +684,13 @@ app.post('/addRSSFeed', async function (req, res) {
     // Validate input
     if (!categoryName || !feedUrl || !feedName) {
         return res.send({ success: false, message: 'Category, feed name, and feed URL are required.' });
+    }
+
+    // Reject URLs that point at private address space before persisting them
+    try {
+        await assertPublicUrl(feedUrl);
+    } catch (error) {
+        return res.send({ success: false, message: error.message });
     }
 
     // Check if the category already exists
@@ -684,9 +822,7 @@ app.post('/getTeamList', async function (req, res) {
         return res.send({ success: false, message: 'A valid sport is required.' });
     }
     
-    const configPath = req.app.locals.configPath;
-    const fileName = req.body.fileName || "startPageInfo";
-    const jsonData = getConfigData(configPath, fileName);
+    const jsonData = getConfigData();
     const existingSportsConfig = jsonData.Sports || [];
     let teams = [];   
     let sportPath = "";
@@ -843,3 +979,5 @@ app.post('/updateCollapsedState', async function (req, res) {
     }
 });
 // #endregion
+
+module.exports = { app, isPrivateAddress, assertPublicUrl };

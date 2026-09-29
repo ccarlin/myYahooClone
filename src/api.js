@@ -1,4 +1,4 @@
-export const fetchData = async (endpoint, setState, timestampKey, prefix, setTimestamps) => {
+export const fetchData = async (endpoint, setState, timestampKey, setTimestamps) => {
   try {
     // Use environment variable if available, otherwise fallback to localhost
     const apiUrl = (typeof process !== "undefined" && process.env && process.env.PUBLIC_API_URL)

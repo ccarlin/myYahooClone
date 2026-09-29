@@ -121,7 +121,7 @@ const ManageSportsModal = ({ setSportsFeeds, setTimestamps }) => {
       const result = await response.json();
       if (result.success) {
         alert(result.message);
-        fetchData('/sportsUpdate', setSportsFeeds, 'sports', 'sports', setTimestamps);
+        fetchData('/sportsUpdate', setSportsFeeds, 'sports', setTimestamps);
         
         // Close the modal
         const modalElement = document.getElementById('manage-sports');

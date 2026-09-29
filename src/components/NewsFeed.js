@@ -16,7 +16,7 @@ const NewsFeed = ({ newsFeeds, setNewsFeeds, showTrashIcons, setTimestamps }) =>
       if (result.success) {
         alert(result.message);
         // Refresh the news feeds after deletion
-        fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setTimestamps);
+        fetchData('/newsUpdate', setNewsFeeds, 'news', setTimestamps);
       } else {
         alert(result.message);
       }

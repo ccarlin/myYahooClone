@@ -38,19 +38,19 @@ const App = () => {
   }, [theme]);
 
   const updateStockData = () => {
-    fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setTimestamps);
+    fetchData('/stockUpdate', setStockInfo, 'stock', setTimestamps);
   };
 
   const updateNewsData = () => {
-    fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setTimestamps);
+    fetchData('/newsUpdate', setNewsFeeds, 'news', setTimestamps);
   };
 
   const updateSportsData = () => {
-    fetchData('/sportsUpdate', setSportsFeeds, 'sports', 'sports', setTimestamps);
+    fetchData('/sportsUpdate', setSportsFeeds, 'sports', setTimestamps);
   };
 
   const updateWeatherData = () => {
-    fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setTimestamps);
+    fetchData('/weatherUpdate', setWeatherInfo, 'weather', setTimestamps);
   };
 
   useEffect(() => {
@@ -69,7 +69,7 @@ const App = () => {
             <h2>
               Stock Information - <span className="small-text">{timestamps.stock}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon"
-                onClick={() => fetchData('/stockUpdate', setStockInfo, 'stock', 'stock', setTimestamps)}
+                onClick={() => fetchData('/stockUpdate', setStockInfo, 'stock', setTimestamps)}
               />
               <img src="config.png" title="Configure Stocks" data-bs-toggle="modal" data-bs-target="#manage-stocks" 
                 width="20px" className="img-link" alt="Manage Stocks" 
@@ -81,19 +81,19 @@ const App = () => {
             <h2>
               News Feed - <span className="small-text">{timestamps.news}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon" 
-                onClick={() => fetchData('/newsUpdate', setNewsFeeds, 'news', 'news', setTimestamps)}
+                onClick={() => fetchData('/newsUpdate', setNewsFeeds, 'news', setTimestamps)}
               />
               <img src="config.png" title="Configure Feeds" data-bs-toggle="modal" data-bs-target="#manage-rss" 
                 width="20px" className="img-link" alt="Manage Feeds" 
               />
             </h2>
-            <NewsFeed newsFeeds={newsFeeds} fetchData={fetchData} setNewsFeeds={setNewsFeeds} showTrashIcons={showTrashIcons} setTimestamps={setTimestamps} />
+            <NewsFeed newsFeeds={newsFeeds} setNewsFeeds={setNewsFeeds} showTrashIcons={showTrashIcons} setTimestamps={setTimestamps} />
           </td>
           <td valign="top" width="35%" style={{ paddingLeft: '10px' }}>
             <h2>
               Sports - <span className="small-text">{timestamps.sports}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon"
-                onClick={() => fetchData('/sportsUpdate', setSportsFeeds, 'sports', 'sports', setTimestamps)}
+                onClick={() => fetchData('/sportsUpdate', setSportsFeeds, 'sports', setTimestamps)}
               />
               <img src="config.png" title="Configure Sports" data-bs-toggle="modal" data-bs-target="#manage-sports" 
                 width="20px" className="img-link" alt="Manage Sports" 
@@ -109,7 +109,7 @@ const App = () => {
             <h2>
               Weather Information - <span className="small-text">{timestamps.weather}</span>
               <img src="refresh.png" alt="Refresh" className="refresh-icon"
-                onClick={() => fetchData('/weatherUpdate', setWeatherInfo, 'weather', 'weather', setTimestamps)}
+                onClick={() => fetchData('/weatherUpdate', setWeatherInfo, 'weather', setTimestamps)}
               />
               <img src="config.png" title="Configure Weather" data-bs-toggle="modal" data-bs-target="#manage-weather" 
                 width="20px" className="img-link" alt="Manage Weather" />
@@ -120,12 +120,10 @@ const App = () => {
       </table>
 
       {/* Modals */}
-      {/* Modals */}
       <ManageStocksModal setStockInfo={setStockInfo} setTimestamps={setTimestamps} />
       <ManageSportsModal setSportsFeeds={setSportsFeeds} setTimestamps={setTimestamps} />
       <ManageRssModal setNewsFeeds={setNewsFeeds} setTimestamps={setTimestamps} />
       <ManageWeatherModal setWeatherInfo={setWeatherInfo} setTimestamps={setTimestamps} />
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </div>
   );
 };  
