@@ -69,7 +69,7 @@
       "name": "St. Louis, MO",
       "latitude": 38.627,
       "longitude": -90.1994,
-      "collapsed": true
+      "collapsed": false
     },
     {
       "name": "Minneapolis, MN",
@@ -300,7 +300,7 @@
           "id": "10"
         }
       ],
-      "collapsed": true
+      "collapsed": false
     },
     {
       "name": "NFL",

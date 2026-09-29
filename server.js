@@ -78,7 +78,6 @@ function isPrivateAddress(ip)
         if (a === 172 && b >= 16 && b <= 31) return true;
         if (a === 192 && b === 168) return true;
         if (a === 100 && b >= 64 && b <= 127) return true;
-        if (a === 192 && b === 0) return true;
         if (a === 198 && (b === 18 || b === 19)) return true;
         if (a >= 224) return true;
         return false;
@@ -271,6 +270,12 @@ async function getStockPrices(symbols)
 // Function to strip HTML and provide plain text similar to contentSnippet
 const stripHtml = (html) => {
     if (!html) return undefined;
+    // feedsmith v3 returns item.summary as { value, type } rather than a string.
+    if (typeof html === 'object') {
+        html = html.value ?? html.content ?? undefined;
+        if (!html) return undefined;
+    }
+    if (typeof html !== 'string') return undefined;
     // Remove HTML tags
     let text = html.replace(/<[^>]*>?/gm, '');
     // Basic HTML entity decoding
@@ -281,6 +286,32 @@ const stripHtml = (html) => {
                .replace(/&quot;/g, '"')
                .replace(/&#39;/g, "'");
     return text.trim();
+};
+
+// feedsmith v3 returns some entry fields as objects and omits others entirely
+// depending on the feed format (RSS vs Atom/RDF):
+//   title:  { value, type } on Atom/RDF, plain string on RSS
+//   guid:   { value, isPermaLink } on RSS, absent on Atom (uses `id`)
+//   link:   string on RSS, absent on Atom (uses a `links` array)
+// Anything left as an object reaches React as an object child, which throws
+// "Objects are not valid as a React child" and blanks the whole page, so every
+// value sent to the client must resolve to a string or undefined.
+const toText = (value) => {
+    if (value === null || value === undefined) return undefined;
+    if (typeof value === 'string') return value === '' ? undefined : value;
+    if (Array.isArray(value)) {
+        for (const entry of value) {
+            const text = toText(entry);
+            if (text) return text;
+        }
+        return undefined;
+    }
+    if (typeof value === 'object') {
+        if (typeof value.value === 'string' && value.value !== '') return value.value;
+        if (typeof value.content === 'string' && value.content !== '') return value.content;
+        if (typeof value.href === 'string' && value.href !== '') return value.href;
+    }
+    return undefined;
 };
 
 async function getNewsFeedInfo(feedList)
@@ -316,9 +347,9 @@ async function getNewsFeedInfo(feedList)
                 }
 
                 let feedData = {
-                    title: parsed.title,
-                    description: parsed.description,
-                    link: parsed.link,
+                    title: toText(parsed.title),
+                    description: toText(parsed.description) || toText(parsed.subtitle),
+                    link: toText(parsed.link) || toText(parsed.links),
                     pubDate: parsed.pubDate,
                     language: parsed.language,
                     copyright: parsed.copyright,
@@ -328,9 +359,9 @@ async function getNewsFeedInfo(feedList)
                     items: items.slice(0, 5).map(item => {
                         const content = item.description || item.summary || item.contentSnippet || item.content;
                         return {
-                            title: item.title,
+                            title: toText(item.title),
                             contentSnippet: stripHtml(content),
-                            link: item.link
+                            link: toText(item.link) || toText(item.links) || toText(item.guid) || toText(item.id)
                         };
                     })
                 };
@@ -980,4 +1011,4 @@ app.post('/updateCollapsedState', async function (req, res) {
 });
 // #endregion
 
-module.exports = { app, isPrivateAddress, assertPublicUrl };
+module.exports = { app, isPrivateAddress, assertPublicUrl, stripHtml, toText };
