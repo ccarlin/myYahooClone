@@ -16,6 +16,7 @@
     "yahoo-finance2": "^4.0.2"
   },
   "scripts": {
+    "postinstall": "node scripts/ensure-config.js",
     "start": "rsbuild dev",
     "build": "rsbuild build",
     "preview": "rsbuild preview",

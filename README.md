@@ -60,6 +60,18 @@ All content lives in `myyahoo.json` at the project root:
 
 You can edit this file directly, or add/remove entries from the gear icons in the UI.
 
+### `myyahoo.json` is not tracked in git
+
+Because the UI rewrites this file as you use it, it holds personal state and is
+git-ignored. The tracked template is `myyahoo.example.json`.
+
+`npm install` runs `scripts/ensure-config.js` as a `postinstall` step, which copies
+the template to `myyahoo.json` **only if that file does not already exist** — your
+edits are never overwritten. The server runs the same check on startup, so a fresh
+clone also works if you skip install hooks (for example with `npm ci --ignore-scripts`).
+
+The template is copied rather than renamed so it stays available for future installs.
+
 ## Install
 
 **Requirements:** [Node.js](https://nodejs.org/) `>=22.12.0` and npm.
@@ -73,6 +85,8 @@ git clone https://github.com/ccarlin/myYahooClone.git
 cd myYahooClone
 npm install
 ```
+
+`npm install` also creates `myyahoo.json` from `myyahoo.example.json` on first run.
 
 ## Run locally
 
@@ -151,9 +165,13 @@ docker-compose logs -f server
 ```
 
 **Configuration:** `myyahoo.json` is bind-mounted from the project directory into the
-server container, so edits made locally are picked up by the running server. The client's
-API URL is set to `http://server:5000` (the Compose service name) via the
-`PUBLIC_API_URL` environment variable.
+server container, so edits made locally are picked up by the running server. Because that
+file is git-ignored, it must exist before `docker compose up` — the `postinstall` hook
+creates it on `npm install`, or copy it yourself with
+`cp myyahoo.example.json myyahoo.json`. If the source file is missing, Docker creates a
+*directory* in its place and the server reports a clear error rather than failing
+cryptically. The client's API URL is set to `http://server:5000` (the Compose service
+name) via the `PUBLIC_API_URL` environment variable.
 
 ## Security
 

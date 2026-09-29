@@ -7,6 +7,7 @@ const yahooFinance = require('yahoo-finance2').default;
 const fetchWeatherApi = require('openmeteo').fetchWeatherApi;
 const { parseFeed } = require('feedsmith');
 const axios = require("axios");
+const { ensureConfig } = require('./scripts/ensure-config.js');
 
 const app = express();
 const PORT = 5000;
@@ -630,6 +631,10 @@ async function getSportsFeed(sport, teams, dateFetch)
 // #region Helper Methods
 function getConfigData()
 {
+    // A fresh clone has no myyahoo.json until install (or this first run) seeds
+    // it from the tracked template.
+    ensureConfig();
+
     let jsonFile = fs.readFileSync("./myyahoo.json");
     let jsonData = JSON.parse(jsonFile);
 

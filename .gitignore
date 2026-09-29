@@ -22,3 +22,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# personal config, seeded from myyahoo.example.json by scripts/ensure-config.js
+/myyahoo.json
