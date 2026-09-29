@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as a parent image
-FROM node:20-alpine
+FROM node:24-alpine
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
 
 # Install production dependencies
-RUN npm install --production --legacy-peer-deps
+RUN npm install --omit=dev --legacy-peer-deps
 
 # Copy the rest of the application code
 COPY server.js .

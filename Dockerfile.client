@@ -1,5 +1,5 @@
 # Stage 1: Build the React application
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Set the working directory
 WORKDIR /usr/src/app
@@ -19,7 +19,7 @@ RUN npm install --legacy-peer-deps
 RUN npm run build
 
 # Stage 2: Serve the static files from the build
-FROM node:20-alpine
+FROM node:24-alpine
 
 WORKDIR /usr/src/app
 
@@ -28,7 +28,7 @@ COPY package.json package-lock.json ./
 
 # Install only 'serve' and production dependencies (though serve is the main one here for this stage)
 # We run a full npm install to ensure 'serve' is available via npx or in node_modules/.bin
-RUN npm install --production --legacy-peer-deps
+RUN npm install --omit=dev --legacy-peer-deps
 
 # Copy the build output from the builder stage
 COPY --from=builder /usr/src/app/dist ./dist
